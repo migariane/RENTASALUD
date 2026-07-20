@@ -3,7 +3,7 @@ source("global.R")
 # ── UI ──
 ui <- page_navbar(
   title = tags$span(
-    bsicons::bs_icon("globe-americas", size = "1.2em"),
+    bsicons::bs_icon("people", size = "1.2em"),
     " Desigualdades Sociales en Andalucía"
   ),
   theme = app_theme,
@@ -28,8 +28,8 @@ ui <- page_navbar(
             p(strong("Fuente Esperanza de Vida:"), "BDLPA — Base de Datos Longitudinal de Población de Andalucía (Estadísticas Longitudinales de Supervivencia y Longevidad, cohorte censal 2011, seguimiento hasta 2023). Instituto de Estadística y Cartografía de Andalucía (IECA) y Universidad de Granada."),
             p(strong("Cartografía:"), "Shapefiles por año (INE)."),
             hr(),
-            p(strong("Autores:"), "Miguel Ángel Luque-Fernández, Gustavo Rivas Gervilla, Mario Rivera Izquierdo, Miguel Ángel Montero Alonso y Juan Manuel Melchor Rodríguez (Doctores de la UGR)"),
-            p(strong("Web:"), tags$a(href="https://migariane.github.io", target="_blank", "migariane.github.io")),
+            p(strong("Autores:"), "Miguel Ángel Luque-Fernández, Paloma Massó Guijarro, Gustavo Rivas Gervilla, Mario Rivera Izquierdo, Miguel Ángel Montero Alonso y Juan Manuel Melchor Rodríguez (Doctores de la UGR) — ",
+              tags$a(href="https://migariane.github.io", target="_blank", "migariane.github.io")),
             hr(),
             div(style="text-align: center;", tags$img(src="logo_ugr.png", height="50px", style="margin-bottom: 10px;")),
             p(style="font-size: 0.85em; color: #5d6d7e;", strong("Financiación:"), "Plan Propio de Investigación y Transferencia de la Universidad de Granada. 2025. Programa 21. Programa de estimulación a la investigación.")
@@ -77,7 +77,7 @@ ui <- page_navbar(
       ),
 
       div(class = "app-footer",
-        HTML("Fuente: INE &middot; Atlas de Distribución de Renta de los Hogares &middot; BDLPA (IECA-UGR) &middot; Secciones censales 2015-2022 <br> Autores: Miguel Ángel Luque-Fernández, Gustavo Rivas Gervilla, Mario Rivera Izquierdo, Miguel Ángel Montero Alonso y Juan Manuel Melchor Rodríguez")
+        HTML("Fuente: INE &middot; Atlas de Distribución de Renta de los Hogares &middot; BDLPA (IECA-UGR) &middot; Secciones censales 2015-2022 <br> Autores: Miguel Ángel Luque-Fernández, Paloma Massó Guijarro, Gustavo Rivas Gervilla, Mario Rivera Izquierdo, Miguel Ángel Montero Alonso y Juan Manuel Melchor Rodríguez")
       )
     )
   ),
@@ -95,7 +95,6 @@ ui <- page_navbar(
       sidebar = sidebar(
         width = 300,
         selectInput("ts_prov", "Provincia:", choices = provincias_disponibles, selected = "Granada"),
-        uiOutput("ts_seccion_selector"),
         selectInput("ts_ind", "Indicador:", choices = indicadores_completos, selected = "Renta_Mediana_UC"),
         hr(),
         p(strong("Estadísticos descriptivos"), style = "color:#1a5276; font-weight:600;"),
@@ -104,7 +103,7 @@ ui <- page_navbar(
         ),
         hr(),
         p(style = "font-size:0.85em; color:#5d6d7e;",
-          "Evolución temporal del indicador seleccionado para una sección censal concreta (2015–2022)."),
+          "Evolución temporal del indicador seleccionado a nivel de provincia (2015–2022)."),
         p(style = "font-size:0.85em; color:#5d6d7e;",
           "La EV no varía anualmente porque se calcula sobre todo el período de seguimiento de la BDLPA (2011–2023).")
       ),
@@ -112,7 +111,7 @@ ui <- page_navbar(
         full_screen = TRUE,
         card_header(
           class = "d-flex justify-content-between align-items-center",
-          div(strong("Evolución temporal por sección censal"), " — ", textOutput("ts_title", inline = TRUE))
+          div(strong("Evolución temporal por provincia"), " — ", textOutput("ts_title", inline = TRUE))
         ),
         card_body(plotlyOutput("ts_plot", height = "500px"))
       )
@@ -268,8 +267,8 @@ ui <- page_navbar(
 
       h2("Autoría y Financiación"),
       div(class = "definition-card",
-        p(strong("Autores:"), " Miguel Ángel Luque-Fernández, Gustavo Rivas Gervilla, Mario Rivera Izquierdo, Miguel Ángel Montero Alonso y Juan Manuel Melchor Rodríguez (Doctores de la UGR)"),
-        p(strong("Página Web (MALF):"), tags$a(href="https://migariane.github.io", target="_blank", "migariane.github.io")),
+        p(strong("Autores:"), " Miguel Ángel Luque-Fernández, Paloma Massó Guijarro, Gustavo Rivas Gervilla, Mario Rivera Izquierdo, Miguel Ángel Montero Alonso y Juan Manuel Melchor Rodríguez (Doctores de la UGR) — ",
+          tags$a(href="https://migariane.github.io", target="_blank", "migariane.github.io")),
         hr(),
         div(style="margin-bottom: 15px;", tags$img(src="logo_ugr.png", height="60px")),
         p(strong("Agradecimientos / Financiación:"), "Plan Propio de Investigación y Transferencia de la Universidad de Granada. 2025. Programa 21. Programa de estimulación a la investigación.")
@@ -338,33 +337,28 @@ server <- function(input, output, session) {
     paste0(round(ev, 1), " años")
   })
 
-  # ── Series Temporales: selector dinámico de sección censal ──
-  output$ts_seccion_selector <- renderUI({
-    req(input$ts_prov)
-    if (input$ts_prov == "Toda Andalucía") {
-      secciones <- datos %>% distinct(id, Municipio) %>% arrange(Municipio)
-    } else {
-      secciones <- datos %>% filter(Provincia == input$ts_prov) %>% distinct(id, Municipio) %>% arrange(Municipio)
-    }
-    etiquetas <- paste0(secciones$Municipio, " (", secciones$id, ")")
-    choices <- setNames(secciones$id, etiquetas)
-    selectInput("ts_seccion", "Sección censal:", choices = choices, selected = secciones$id[1])
-  })
-
-  # ── Series Temporales: datos filtrados para la sección ──
+  # ── Series Temporales: datos agregados por provincia ──
   ts_data <- reactive({
-    req(input$ts_seccion)
-    datos %>%
-      filter(id == input$ts_seccion) %>%
-      arrange(año)
+    req(input$ts_prov)
+    vars <- c("Renta_Mediana_UC", "edad_media", "pob", "menor_18", "mayor_65",
+              "tam_hogar", "hogares_uni", "pob_esp", "pob_extranjera",
+              "Renta_Quintil", "EV_Hombres", "EV_Mujeres", "EV_Media")
+    if (input$ts_prov == "Toda Andalucía") {
+      datos %>%
+        group_by(año) %>%
+        summarise(across(all_of(vars), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
+    } else {
+      datos %>%
+        filter(Provincia == input$ts_prov) %>%
+        group_by(año) %>%
+        summarise(across(all_of(vars), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
+    }
   })
 
   # ── Series Temporales: título ──
   output$ts_title <- renderText({
-    req(ts_data())
-    df <- ts_data()
     ind_name <- names(indicadores_completos)[indicadores_completos == input$ts_ind]
-    paste0(df$Municipio[1], " (", input$ts_seccion, ") — ", ind_name)
+    paste0(input$ts_prov, " — ", ind_name)
   })
 
   # ── Series Temporales: gráfico de evolución ──
@@ -375,14 +369,13 @@ server <- function(input, output, session) {
     ind_name <- names(indicadores_completos)[indicadores_completos == input$ts_ind]
 
     if (all(is.na(val))) {
-      return(plot_ly() %>% layout(title = "Sin datos disponibles para esta sección"))
+      return(plot_ly() %>% layout(title = "Sin datos disponibles"))
     }
 
     hover_text <- sapply(seq_len(nrow(df)), function(i) {
       v <- df[[input$ts_ind]][i]
       if (is.na(v)) return(paste0(df$año[i], ": Sin datos"))
-      fv <- format_value(v, input$ts_ind)
-      paste0(df$año[i], ": ", fv)
+      paste0(df$año[i], ": ", format_value(v, input$ts_ind))
     })
 
     plot_ly(df,
@@ -396,7 +389,7 @@ server <- function(input, output, session) {
       showlegend = FALSE
     ) %>%
       layout(
-        xaxis = list(title = "Año", dtick = 1, tickangle = 0, gridcolor = "#e8e8e8"),
+        xaxis = list(title = "Año", dtick = 1, gridcolor = "#e8e8e8"),
         yaxis = list(title = ind_name, gridcolor = "#e8e8e8"),
         plot_bgcolor = "rgba(0,0,0,0)",
         paper_bgcolor = "rgba(0,0,0,0)",
