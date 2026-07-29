@@ -188,6 +188,10 @@
 \usepackage{bookmark}
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \urlstyle{same}
+% fallback for those not using the hyperref driver hyperxmp:
+\makeatletter
+\@ifundefined{xmpquote}{\newcommand{\xmpquote}[1]{#1}}{}
+\makeatother
 \hypersetup{
   pdftitle={RENTASALUD: a web-based interactive atlas of social inequalities and life expectancy in Andalusia (southern Spain)},
   colorlinks=true,
@@ -198,13 +202,16 @@
   pdfcreator={LaTeX via pandoc}}
 
 
-\renewcommand{\today}{2026-07-20}
+\renewcommand{\today}{2026-07-29}
 \newcommand{\runninghead}{A Preprint }
 \title{RENTASALUD: a web-based interactive atlas of social inequalities
 and life expectancy in Andalusia (southern Spain)}
 \def\asep{\\\\\\ } % default: all authors on same column
-\author{\textbf{Paloma Massó Guijarro}\\\\Department of Preventive
-Medicine and Public Health, University of
+\author{\textbf{Miguel Ángel Luque-Fernández}\\\\Department of
+Statistics and Operations Research, University of
+Granada\\Granada\\\href{mailto:mluquefe@ugr.es}{mluquefe@ugr.es}\asep\textbf{Paloma
+Massó Guijarro}\\\\Department of Preventive Medicine and Public Health,
+University of
 Granada\\Granada\\\href{mailto:pmasso@ugr.es}{pmasso@ugr.es}\asep\textbf{Gustavo
 Rivas Gervilla}\\\\Department of Statistics and Operations Research,
 University of
@@ -219,11 +226,8 @@ Research, University of
 Granada\\Granada\\\href{mailto:mmontero@ugr.es}{mmontero@ugr.es}\asep\textbf{Juan
 Manuel Melchor Rodríguez}\\\\Department of Statistics and Operations
 Research, University of
-Granada\\Granada\\\href{mailto:jmelchor@ugr.es}{jmelchor@ugr.es}\asep\textbf{Miguel
-Ángel Luque-Fernández}\\\\Department of Statistics and Operations
-Research, University of
-Granada\\Granada\\\href{mailto:mluquefe@ugr.es}{mluquefe@ugr.es}}
-\date{2026-07-20}
+Granada\\Granada\\\href{mailto:jmelchor@ugr.es}{jmelchor@ugr.es}}
+\date{2026-07-29}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -232,134 +236,132 @@ at fine geographical scales are scarce for southern Europe.
 \textbf{Methods} We linked INE census-section income data (49,888
 section-years, 2015--2022) with BDLPA cohort life tables
 (\textasciitilde637,000 individuals, follow-up 2011--2023) for
-Andalusia, Spain. Correlation, clustering and GAMs assessed the
+Andalusia, Spain. Correlation and clustering assessed the
 income--longevity association. \textbf{Results} Life expectancy was 79.5
 (men) and 84.4 years (women). Eliminating tumours would yield the
-largest gain (3.93 years, men; 2.83, women). The income--longevity
-correlation was weak (r=0.21, 95\%CI −0.59 to 0.81). An R Shiny
-application integrates all findings in five interactive tabs.
-\textbf{Conclusion} RENTASALUD provides an open tool for exploring
-health inequalities. Provincial aggregation masks steep census-tract
-gradients reported nationally. \textbf{Keywords:} health inequalities;
-life expectancy; spatial epidemiology; interactive atlas; Shiny;
-Andalusia
+largest gain for men (3.93 years), while heart disease accounted for the
+largest gain among women (2.89 years). The income--longevity correlation
+was weak (r=0.21, 95\%CI −0.59 to 0.81). An R Shiny application
+integrates all findings in six interactive tabs. \textbf{Conclusion}
+RENTASALUD provides an open tool for exploring health inequalities.
+Provincial aggregation masks steep census-tract gradients reported
+nationally. \textbf{Keywords:} health inequalities; life expectancy;
+spatial epidemiology; interactive atlas; Shiny; Andalusia
 \end{abstract}
 
 
 \section{Introduction}\label{introduction}
 
-Socioeconomic gradients in mortality and life expectancy are extensively
-documented across Europe (Marmot 2010; {Mackenbach et al.} 2015).
-Southern European countries, including Spain, consistently exhibit
-smaller educational inequalities in mortality than Northern or Eastern
-European regions, a pattern attributed to the Mediterranean diet, strong
-social networks and universal healthcare coverage ({Mackenbach et al.}
-2018; Regidor et al. 2012). Despite these smaller relative inequalities,
-the absolute burden remains substantial: approximately one in five
-deaths in Spain (roughly 80,000 annually) has been attributed to
-educational disparities, driven primarily by cardiovascular diseases,
-smoking-related cancers, respiratory diseases and external causes
-({Regidor et al.} 2014).
+It is well known that people with more money tend to live longer, and
+this pattern holds across most European countries (Marmot 2010;
+{Mackenbach et al.} 2015). In Southern Europe --- including Spain ---
+the gap between rich and poor is somewhat narrower than in Northern or
+Eastern Europe. This has been linked to the Mediterranean diet, strong
+family and community networks, and universal healthcare ({Mackenbach et
+al.} 2018; Regidor et al. 2012). But even in Spain, educational
+disparities still account for roughly one in five deaths --- about
+80,000 each year --- mostly from heart disease, lung cancer, respiratory
+illnesses, and accidents ({Regidor et al.} 2014).
 
-At the census-tract level, the evidence on socioeconomic gradients is
-particularly compelling. Redondo-Sánchez et al. (Redondo-Sánchez et al.
-2022) constructed life tables by deprivation quintile across all Spanish
-census tracts for 2011--2013 and reported that women and men in the most
-deprived areas lived 3.2 and 3.8 years less, respectively, than those in
-the least deprived areas. This gradient was more pronounced among men
-and varied geographically, with higher life expectancy in northern
-regions and provincial capitals compared to rural areas.
+How big is the gap when we look at small areas like neighbourhoods or
+census tracts? A recent national study by Redondo-Sánchez and colleagues
+(Redondo-Sánchez et al. 2022) found that women and men living in Spain's
+most deprived neighbourhoods lived 3.2 and 3.8 years less, respectively,
+than those in the wealthiest areas. This gap was wider for men and
+varied by region, with northern Spain and provincial capitals faring
+better.
 
-Andalusia, the most populous autonomous community in Spain
-(approximately 8.5 million inhabitants), has historically exhibited
-lower incomes and higher unemployment than the national average.
-Region-specific interactive tools integrating socioeconomic determinants
-with mortality outcomes remain scarce; most existing platforms aggregate
-at coarse administrative levels or lack interactive visualisation
-capabilities.
+Andalusia, home to about 8.5 million people, is Spain's largest region
+and one of its most economically disadvantaged. Despite this, there are
+few interactive tools that let people explore how income, demographics,
+and life expectancy come together at the neighbourhood level. Most
+existing maps are either too coarse (showing only whole provinces) or
+lack the interactive features that would make them useful for
+policymakers, researchers, or the public.
 
-RENTASALUD addresses this gap by providing an open-source Shiny atlas
-that combines granular INE census-section socioeconomic data
-(2015--2022) with life expectancy estimates from the Longitudinal
-Database of the Andalusian Population (BDLPA, 2011 census cohort,
-\textasciitilde637,000 individuals, follow-up through 2023). Our
-objectives were to: (i) estimate life expectancy by province and sex;
-(ii) decompose gains by cause of death; (iii) examine the
-income--longevity association through correlation, clustering and
-non-linear methods; and (iv) develop an interactive web application
-accessible to researchers, policymakers and the public.
+RENTASALUD was built to fill this gap. It is an open-source web atlas
+that combines detailed census-section data from Spain's National
+Statistics Institute (INE, 2015--2022) with life expectancy estimates
+from the Longitudinal Database of the Andalusian Population (BDLPA),
+which follows about 637,000 people from the 2011 census through to 2023.
+Our aims were: (i) to estimate life expectancy by province and sex; (ii)
+to see how much longer people would live if certain causes of death were
+eliminated; (iii) to examine the relationship between income and life
+expectancy; and (iv) to build an interactive tool that anyone can use.
 
 \section{Methods}\label{methods}
 
-\subsection{Study design and data}\label{study-design-and-data}
+\subsection{Data sources}\label{data-sources}
 
-We used INE \emph{Atlas de Distribución de Renta de los Hogares} data
-comprising 49,888 census section--year observations across all eight
-Andalusian provinces (2015--2022). Variables included median disposable
-income per consumption unit (modified OECD equivalence scale), mean age,
-percentage of population under 18 and over 65 years, household size,
-proportion of single-person households, and population counts.
+We used two main datasets. The first comes from the INE's \emph{Atlas de
+Distribución de Renta de los Hogares}, covering all eight Andalusian
+provinces from 2015 to 2022. It includes nearly 50,000 census
+section--year observations with information on median income, age
+structure, household composition, and population size --- all at the
+neighbourhood level.
 
-Life expectancy was estimated from the BDLPA, a 10\% representative
-sample of the 2011 Census of Andalusia (\textasciitilde637,000
-individuals) with mortality follow-up to 31 December 2023. The BDLPA
-provided age at census, sex, province of residence, survival status
-(alive, emigrated from Andalusia, deceased), and cause of death coded
-into 10 major groups: circulatory diseases, malignant tumours, endocrine
-diseases, infectious diseases, respiratory diseases, digestive diseases,
-nervous system diseases, external causes, alcohol-related causes and
-remaining causes.
+The second dataset is the BDLPA, which follows a random 10\% sample of
+people who lived in Andalusia at the time of the 2011 census
+(\textasciitilde637,000 individuals). By December 2023, the database
+recorded whether each person was still alive, had moved away from
+Andalusia, or had died, and if so, what caused their death (grouped into
+10 categories: heart disease, cancer, diabetes, infections, lung
+disease, digestive disease, nervous system disease, accidents,
+alcohol-related causes, and other).
 
-\subsection{Life expectancy
-estimation}\label{life-expectancy-estimation}
+\subsection{How we calculated life
+expectancy}\label{how-we-calculated-life-expectancy}
 
-We constructed abridged period life tables using Chiang's method (Chiang
-1968) with 5-year age intervals (0--4 to 85--89) and an open-ended 90+
-interval. Cause-deleted life tables estimated gains from eliminating
-each cause. Life expectancy was computed at the provincial level (eight
-provinces × two sexes = 16 tables). Census-section estimation was
-impossible because the BDLPA individual identifier is sequential and
-contains no geographical information beyond province.
+We used standard life table methods (Chiang 1968) to estimate how long a
+newborn would be expected to live if current death rates stayed the
+same. We grouped ages into standard 5-year bands (0--4, 5--9, \ldots,
+85--89) with an open-ended band for 90 and over. We also calculated what
+life expectancy would be if each cause of death were eliminated --- a
+standard demographic technique called cause-deleted life tables
+(Beltrán-Sánchez et al. 2008).
 
-\subsection{Income--longevity
-association}\label{incomelongevity-association}
+Life expectancy was calculated at the province level (8 provinces × 2
+sexes = 16 tables). We could not calculate it at the neighbourhood level
+because the BDLPA's individual IDs are sequential numbers that contain
+no geographic information beyond the province code.
 
-We examined provincial mean income versus life expectancy using Pearson
-and Spearman correlations, hierarchical clustering (Ward's linkage on
-z-scores), and a generalised additive model (GAM) with penalised cubic
-spline (k=4). Analyses are exploratory given n=8 provinces.
+\subsection{Analysing income and life
+expectancy}\label{analysing-income-and-life-expectancy}
+
+We looked at the relationship between average income and life expectancy
+across the eight provinces using two approaches: simple correlation
+(Pearson and Spearman) and hierarchical clustering (to see which
+provinces group together). These analyses are exploratory --- with only
+eight provinces, we have limited ability to detect patterns.
 
 \subsection{Ethics}\label{ethics}
 
-Approved by the University of Granada Ethics Committee (SOCESVIDA,
-SICEIA-2025-000814, 7 March 2025). Anonymised BDLPA data were provided
-by the IECA; informed consent was not required.
+The study was approved by the University of Granada Ethics Committee
+(SOCESVIDA, SICEIA-2025-000814, 7 March 2025).
 
 \section{Results}\label{results}
 
-\subsection{Life expectancy in
-Andalusia}\label{life-expectancy-in-andalusia}
+\subsection{How long do people in Andalusia
+live?}\label{how-long-do-people-in-andalusia-live}
 
-Life expectancy at birth was 79.5 years for men and 84.4 years for
-women, a sex gap of 4.9 years consistent with national figures and
-reflecting male excess mortality from cardiovascular diseases, lung
-cancer and external causes. Life expectancy decreased progressively with
-age for both sexes: at age 65, remaining life expectancy was 19.1 years
-(men) and 21.9 years (women); at age 85, it was 6.7 and 7.2 years,
-respectively. The complete period life table by age band is available in
-the online application.
+A baby born in Andalusia can expect to live about 79.5 years if male and
+84.4 years if female --- a gap of about 4.8 years. This difference is in
+line with the national pattern and reflects higher rates of heart
+disease, lung cancer, and accidents among men. Life expectancy falls
+steadily with age, as expected: a 65-year-old man can expect about 19.9
+more years and a woman about 23.5; at age 85, the remaining years are
+7.3 for men and 8.4 for women.
 
-Provincial variation was modest but consistent across sexes (Table 1).
-Málaga showed the highest life expectancy (79.6 men, 84.6 women), while
-Cádiz had the lowest (78.8 and 83.7 years). The provincial range---0.8
-years for men and 0.9 years for women---is considerably narrower than
-the socioeconomic gradient of 3.8 and 3.2 years reported at the
-census-tract level (Redondo-Sánchez et al. 2022), likely reflecting
-aggregation bias.
+Life expectancy varies only slightly from one province to another (Table
+1). Málaga has the highest values (79.6 for men, 84.6 for women), while
+Cádiz has the lowest (78.8 and 83.7). The range across provinces is less
+than one year --- much narrower than the 3-to-4-year gap seen between
+wealthy and deprived neighbourhoods at the national level
+(Redondo-Sánchez et al. 2022). This is what we would expect when
+averaging out local differences.
 
 \begin{longtable}[]{@{}lll@{}}
-\caption{Life expectancy at birth by province and sex. Range: 0.8 years
-(men), 0.9 years (women).}\tabularnewline
+\caption{Life expectancy at birth by province and sex.}\tabularnewline
 \toprule\noalign{}
 Province & Men (years) & Women (years) \\
 \midrule\noalign{}
@@ -380,51 +382,57 @@ Málaga & 79.6 & 84.6 \\
 Sevilla & 79.2 & 84.1 \\
 \end{longtable}
 
-\subsection{Cause-of-death
-decomposition}\label{cause-of-death-decomposition}
+\subsection{What would happen if we eliminated major causes of
+death?}\label{what-would-happen-if-we-eliminated-major-causes-of-death}
 
-Malignant tumours were the largest contributor to potential life
-expectancy gain for men (3.93 years) and circulatory diseases for women
-(2.89 years). Combined, these two groups account for \textasciitilde7
-years (men) and \textasciitilde6 years (women). Full results by cause
-are presented in Table 2.
+If cancer were eliminated, men would gain about 3.9 years of life
+expectancy and women about 2.8 years (Table 2). For women, eliminating
+heart disease would have a slightly larger effect (2.9 years). Together,
+cancer and heart disease account for roughly 7 years of potential gain
+for men and nearly 6 for women --- the two biggest targets for
+prevention.
 
 \begin{longtable}[]{@{}lll@{}}
-\caption{Gains in life expectancy (years) if each cause were
-eliminated.}\tabularnewline
+\caption{How many years life expectancy would increase if each cause
+were eliminated.}\tabularnewline
 \toprule\noalign{}
-Cause & Men & Women \\
+Cause & Men (years) & Women (years) \\
 \midrule\noalign{}
 \endfirsthead
 \toprule\noalign{}
-Cause & Men & Women \\
+Cause & Men (years) & Women (years) \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-Malignant tumours & 3.93 & 2.83 \\
-Circulatory diseases & 3.15 & 2.89 \\
-Respiratory diseases & 1.13 & 0.69 \\
-External causes & 0.67 & 0.33 \\
+Cancer (malignant tumours) & 3.93 & 2.83 \\
+Heart and circulatory diseases & 3.15 & 2.89 \\
+Lung diseases & 1.13 & 0.69 \\
+Accidents and suicide & 0.67 & 0.33 \\
 Digestive diseases & 0.57 & 0.48 \\
 Nervous system diseases & 0.50 & 0.57 \\
 Infectious diseases & 0.41 & 0.35 \\
-Endocrine diseases & 0.28 & 0.32 \\
+Diabetes and endocrine diseases & 0.28 & 0.32 \\
 Alcohol-related causes & 0.07 & 0.02 \\
-Remaining causes & 1.13 & 1.19 \\
+Other causes & 1.13 & 1.19 \\
 \end{longtable}
 
-\subsection{Income--life expectancy
-association}\label{incomelife-expectancy-association}
+Men lose more years to cancer than women do (+1.1 years), which reflects
+historically higher smoking rates among Spanish men. Alcohol-related
+causes have a very small effect at the population level, though they can
+be devastating for the individuals and families affected.
 
-The Pearson correlation between provincial mean income and life
-expectancy was weak and non-significant (r = 0.21; 95\% CI: −0.59 to
-0.81; p = 0.62). Spearman's \(\rho\) confirmed this (\(\rho\) = 0.07, p
-= 0.87). Cluster analysis identified two groups: Cluster 1 (Málaga,
-Sevilla, Córdoba, Granada; income €13,341--€14,338; life expectancy
-81.75--82.10 years) and Cluster 2 (Almería, Cádiz, Huelva, Jaén;
-€12,699--€13,172; 81.25--81.85 years). The GAM showed no evidence of
-non-linearity (EDF = 1.32, p = 0.48).
+\subsection{Does income relate to life
+expectancy?}\label{does-income-relate-to-life-expectancy}
+
+At the provincial level, the link between income and life expectancy was
+weak. The correlation was r = 0.21 (95\% CI: −0.59 to 0.81), meaning we
+cannot confidently say that richer provinces have higher life expectancy
+based on these eight data points. The cluster analysis grouped Málaga,
+Sevilla, Córdoba, and Granada together (higher income, marginally longer
+life) and Almería, Cádiz, Huelva, and Jaén together (lower income,
+marginally shorter life), but these differences were small and not
+statistically significant.
 
 \begin{figure}
 
@@ -434,85 +442,93 @@ non-linearity (EDF = 1.32, p = 0.48).
 
 }
 
-\caption{\label{fig-scatter}Scatter plot with loess smoother and linear
-regression (R\^{}2 = 0.04, p = 0.62).}
+\caption{\label{fig-scatter}Scatter plot of income vs.~life expectancy.
+Each dot is a province. The dashed line shows the linear trend (R\^{}2 =
+0.04, p = 0.62).}
 
 \end{figure}%
 
-\subsection{Interactive application}\label{interactive-application}
+This weak result does \emph{not} mean that income doesn't matter for
+health. Rather, it shows that provincial averages are too coarse to
+capture the real relationship. When Redondo-Sánchez et al.
+(Redondo-Sánchez et al. 2022) looked at individual neighbourhoods rather
+than whole provinces, they found a much steeper gradient. The lesson is
+clear: where you live within a province matters a great deal, and we
+need fine-grained data to see the full picture.
 
-The RENTASALUD Shiny application integrates all findings across five
-interactive tabs. The \emph{Explorar} tab features choropleth maps with
-a year slider (2015--2022) for animating temporal changes across 12
-indicators. The \emph{Asistente IA} tab enables natural-language queries
-via large language models (Ollama, OpenAI or Gemini). The
-\emph{Relaciones} tab presents scatter plots with loess smoothers,
-cluster dendrograms and grouped bar charts of life expectancy by
-province and sex. The \emph{Causas Mortalidad} tab provides interactive
-cause-of-death decomposition with horizontal bar charts, searchable
-tables and age-band life expectancy curves. The \emph{Metodología} tab
-documents all indicator definitions. Source code:
+\subsection{The RENTASALUD app}\label{the-rentasalud-app}
+
+All the results above are available in an interactive R Shiny
+application with six tabs: - \textbf{Explore} --- interactive maps of
+income, demographics, and life expectancy by census section, with a year
+slider to see changes over time. - \textbf{AI Assistant} --- ask
+questions in plain Spanish, answered by a large language model running
+locally or in the cloud. - \textbf{Time Series} --- see how any
+indicator has evolved year by year for a selected province. -
+\textbf{Relationships} --- scatter plots and bar charts exploring the
+links between income and life expectancy. - \textbf{Mortality Causes}
+--- interactive bar charts and tables showing how much each cause of
+death shortens life expectancy. - \textbf{Methodology} --- definitions
+of indicators, data sources, and citation information.
+
+The app is open source. Code:
 \href{https://github.com/migariane/RENTASALUD}{github.com/migariane/RENTASALUD}.
+Online version: {[}shinyapps.io link{]}.
 
 \section{Discussion}\label{discussion}
 
-\subsection{Principal findings}\label{principal-findings}
+\subsection{What we found}\label{what-we-found}
 
-This study provides the first integrated, interactive atlas of income,
-demography and life expectancy for Andalusia. Life expectancy at birth
-(79.5 years for men, 84.4 for women) falls below the Spanish national
-average (\textasciitilde80.5 and \textasciitilde86.0 years,
-respectively) (Instituto Nacional de Estadística 2024), consistent with
-Andalusia's historically lower socioeconomic indicators. The dominance
-of malignant tumours and circulatory diseases as causes of premature
-mortality---together accounting for approximately 7 years of potential
-life expectancy gain in men and 6 in women---aligns with European
-preventable mortality patterns (Beltrán-Sánchez et al. 2008; {Mackenbach
-et al.} 2015) and reinforces the continued importance of cancer
-screening, cardiovascular risk prevention and smoking cessation
-interventions. The larger tumour impact in men (+1.1 years vs women)
-reflects Spain's historically higher male smoking prevalence, a gap that
-is narrowing in younger cohorts.
+RENTASALUD brings together, for the first time, detailed
+neighbourhood-level income data with life expectancy estimates for
+Andalusia. Life expectancy (79.5 for men, 84.4 for women) is below the
+Spanish average, which is consistent with the region's lower income
+levels. Cancer and heart disease are the main drivers of early death ---
+together accounting for about 7 years of potential life expectancy gain
+in men. These findings highlight the continued importance of screening
+programmes, cardiovascular prevention, and smoking cessation. The larger
+impact of cancer in men (+1.1 years) reflects Spain's history of higher
+smoking rates among men, although this gap is closing in younger
+generations.
 
-\subsection{Geographical scale and the income--longevity
-gradient}\label{geographical-scale-and-the-incomelongevity-gradient}
+\subsection{Why the income--health link disappears at the provincial
+level}\label{why-the-incomehealth-link-disappears-at-the-provincial-level}
 
-The weak and non-significant provincial-level income--longevity
-correlation (r = 0.21; 95\% CI: -0.59 to 0.81) contrasts sharply with
-the steep census-tract gradients reported by Redondo-Sánchez et al.
-(Redondo-Sánchez et al. 2022), who found a gap of 3.8 years for men and
-3.2 years for women between the most and least deprived census tracts
-nationally. This discrepancy, spanning an order of magnitude,
-illustrates the modifiable areal unit problem (MAUP): provincial
-aggregation masks substantial intra-provincial heterogeneity in both
-income and mortality. The Southern European pattern of smaller health
+The weak correlation between income and life expectancy at the
+provincial level (r = 0.21) stands in stark contrast to the steep
+gradient found at the neighbourhood level (a gap of 3.8 years for men
+and 3.2 for women between the most and least deprived areas)
+(Redondo-Sánchez et al. 2022). This is a classic example of what
+geographers call the \emph{modifiable areal unit problem}: averaging
+data over large areas (provinces) hides the real variation that exists
+within them. The Southern European pattern of smaller health
 inequalities ({Mackenbach et al.} 2018; Regidor et al. 2012) does not
-imply absence of a socioeconomic gradient; rather, the gradient operates
-at finer spatial scales and may be mediated by different
-mechanisms---including dietary patterns, social networks and universal
-healthcare---compared to Northern or Eastern Europe. These findings
-imply that area-based interventions should target the most deprived
-census sections, and RENTASALUD is designed precisely to facilitate this
-through interactive sub-provincial mapping.
+mean there is no inequality --- it just means the gradient operates at a
+finer scale and may be softened by factors like diet, social networks,
+and universal healthcare. The practical implication is that policies
+should target the most disadvantaged neighbourhoods, not whole
+provinces. RENTASALUD is designed to help identify exactly where those
+neighbourhoods are.
 
 \subsection{Strengths and limitations}\label{strengths-and-limitations}
 
-The main strength is the integration of individual-level longitudinal
-mortality follow-up from the BDLPA (\textasciitilde637,000 individuals,
-12 years) with granular census-section socioeconomic data within an
-open-source, reproducible platform featuring an AI-powered query
-interface. Several limitations should be acknowledged. First, life
-expectancy was estimated only at the provincial level, the most
-important limitation; future work should pursue BDLPA--Padrón Continuo
-linkage to recover census-section codes for small-area Bayesian
-estimation. Second, period life tables assume constant age-specific
-mortality rates, which may not hold during periods of rapid change.
-Third, sample sizes limit precision at extreme ages (0--4 and 90+) when
-disaggregating by province and sex. Fourth, there is a partial temporal
-mismatch between income data (2015--2022) and mortality follow-up
-(2011--2023). Fifth, cause-deleted decomposition assumes independence
-between causes, meaning gains from eliminating multiple causes are not
-additive.
+The main strength of this study is that it combines individual-level
+data on nearly 637,000 people followed for 12 years with fine-grained
+socioeconomic information, all within an open-source, interactive
+platform that includes an AI-powered query interface.
+
+However, there are important limitations. First, life expectancy could
+only be calculated at the province level --- the single biggest
+limitation. Future work should link the BDLPA to the municipal register
+(Padrón Continuo) to recover neighbourhood codes and allow small-area
+Bayesian estimation. Second, life tables assume that current death rates
+remain constant, which may not be true during periods of rapid change.
+Third, sample sizes are small at extreme ages (children under 5 and
+people over 90) when broken down by province and sex. Fourth, the income
+data cover 2015--2022, while mortality follow-up covers 2011--2023,
+creating a partial mismatch. Fifth, the cause-deletion method assumes
+that causes of death are independent, which they are not --- eliminating
+one cause does not simply add up with eliminating another.
 
 \section{What is already known on this
 topic}\label{what-is-already-known-on-this-topic}
@@ -520,15 +536,14 @@ topic}\label{what-is-already-known-on-this-topic}
 \begin{itemize}
 \tightlist
 \item
-  Socioeconomic deprivation is strongly associated with mortality in
-  Spain, with a gap of 3.2--3.8 years between most and least deprived
-  census tracts.
+  In Spain, people in the most deprived neighbourhoods live 3 to 4 years
+  less than those in the wealthiest.
 \item
-  Southern Europe exhibits smaller educational inequalities in mortality
-  than Northern or Eastern Europe.
+  Southern Europe has somewhat smaller health inequalities than Northern
+  or Eastern Europe.
 \item
-  Interactive tools integrating income and life expectancy at fine
-  geographical scales remain scarce.
+  Few interactive tools exist that let people explore income and life
+  expectancy together at the neighbourhood level.
 \end{itemize}
 
 \section{What this study adds}\label{what-this-study-adds}
@@ -536,17 +551,17 @@ topic}\label{what-is-already-known-on-this-topic}
 \begin{itemize}
 \tightlist
 \item
-  RENTASALUD provides the first open-source interactive atlas of
-  census-section income and life expectancy for Andalusia.
+  RENTASALUD is the first open-source interactive atlas of
+  neighbourhood-level income and life expectancy for Andalusia.
 \item
-  Provincial-level income--longevity correlation is weak (r = 0.21), in
-  contrast to steep census-tract gradients.
+  At the province level, the income--longevity link is weak (r = 0.21),
+  in contrast to the steep neighbourhood-level gradient.
 \item
-  Malignant tumours and circulatory diseases account for
-  \textasciitilde7 years of potential life expectancy gain in men.
+  Cancer and heart disease together account for about 7 years of
+  potential life expectancy gain in men.
 \item
-  An AI-powered natural language interface enables non-specialist
-  querying of the data.
+  An AI-powered natural language interface lets anyone explore the data
+  without technical training.
 \end{itemize}
 
 \section{Acknowledgements}\label{acknowledgements}
@@ -576,12 +591,7 @@ Cause-Deleted Life Tables and Decompositions of Life Expectancy.''}
 
 \bibitem[\citeproctext]{ref-chiang1968}
 Chiang, Chin Long. 1968. \emph{Introduction to Stochastic Processes in
-Biostatistics}. (New York).
-
-\bibitem[\citeproctext]{ref-ine2024}
-Instituto Nacional de Estadística. 2024. \emph{Indicadores de
-Mortalidad: Esperanza de Vida Al Nacer}.
-\url{https://www.ine.es/jaxiT3/Tabla.htm?t=1415}.
+Biostatistics}. Wiley.
 
 \bibitem[\citeproctext]{ref-mackenbach2015}
 {Mackenbach, Johan P., Ivana Kulhánová, Gwenn Menvielle, et al.} 2015.

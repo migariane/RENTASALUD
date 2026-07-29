@@ -46,8 +46,8 @@ authors:
     email: jmelchor@ugr.es
 abstract: |
   **Background** Interactive tools linking income and life expectancy at fine geographical scales are scarce for southern Europe.
-  **Methods** We linked INE census-section income data (49,888 section-years, 2015–2022) with BDLPA cohort life tables (~637,000 individuals, follow-up 2011–2023) for Andalusia, Spain. Correlation, clustering and GAMs assessed the income–longevity association.
-  **Results** Life expectancy was 79.5 (men) and 84.4 years (women). Eliminating tumours would yield the largest gain (3.93 years, men; 2.83, women). The income–longevity correlation was weak (r=0.21, 95%CI −0.59 to 0.81). An R Shiny application integrates all findings in five interactive tabs.
+  **Methods** We linked INE census-section income data (49,888 section-years, 2015–2022) with BDLPA cohort life tables (~637,000 individuals, follow-up 2011–2023) for Andalusia, Spain. Correlation and clustering assessed the income–longevity association.
+  **Results** Life expectancy was 79.5 (men) and 84.4 years (women). Eliminating tumours would yield the largest gain for men (3.93 years), while heart disease accounted for the largest gain among women (2.89 years). The income–longevity correlation was weak (r=0.21, 95%CI −0.59 to 0.81). An R Shiny application integrates all findings in six interactive tabs.
   **Conclusion** RENTASALUD provides an open tool for exploring health inequalities. Provincial aggregation masks steep census-tract gradients reported nationally.
   **Keywords:** health inequalities; life expectancy; spatial epidemiology; interactive atlas; Shiny; Andalusia
 date: today
@@ -78,13 +78,13 @@ The second dataset is the BDLPA, which follows a random 10% sample of people who
 
 ## How we calculated life expectancy
 
-We used standard life table methods (Chiang, 1968) to estimate how long a newborn would be expected to live if current death rates stayed the same. We grouped ages into standard 5-year bands (0–4, 5–9, ..., 85–89) with an open-ended band for 90 and over. We also calculated what life expectancy would be if each cause of death were eliminated — a standard demographic technique called cause-deleted life tables.
+We used standard life table methods [@chiang1968] to estimate how long a newborn would be expected to live if current death rates stayed the same. We grouped ages into standard 5-year bands (0–4, 5–9, ..., 85–89) with an open-ended band for 90 and over. We also calculated what life expectancy would be if each cause of death were eliminated — a standard demographic technique called cause-deleted life tables [@beltran-sanchez2008].
 
 Life expectancy was calculated at the province level (8 provinces × 2 sexes = 16 tables). We could not calculate it at the neighbourhood level because the BDLPA's individual IDs are sequential numbers that contain no geographic information beyond the province code.
 
 ## Analysing income and life expectancy
 
-We looked at the relationship between average income and life expectancy across the eight provinces using three approaches: simple correlation (Pearson and Spearman), hierarchical clustering (to see which provinces group together), and a flexible statistical model (GAM) that can detect curved, non-linear relationships. These analyses are exploratory — with only eight provinces, we have limited ability to detect patterns.
+We looked at the relationship between average income and life expectancy across the eight provinces using two approaches: simple correlation (Pearson and Spearman) and hierarchical clustering (to see which provinces group together). These analyses are exploratory — with only eight provinces, we have limited ability to detect patterns.
 
 ## Ethics
 
@@ -113,7 +113,7 @@ Life expectancy varies only slightly from one province to another (Table 1). Má
 
 ## What would happen if we eliminated major causes of death?
 
-If cancer were eliminated, men would gain about 3.9 years of life expectancy and women about 2.8 years (Table 2). For women, eliminating heart disease would have a similar effect (2.9 years). Together, cancer and heart disease account for roughly 7 years of potential gain for men and 6 for women — the two biggest targets for prevention.
+If cancer were eliminated, men would gain about 3.9 years of life expectancy and women about 2.8 years (Table 2). For women, eliminating heart disease would have a slightly larger effect (2.9 years). Together, cancer and heart disease account for roughly 7 years of potential gain for men and nearly 6 for women — the two biggest targets for prevention.
 
 | Cause | Men (years) | Women (years) |
 |---|---|---|
@@ -142,12 +142,13 @@ This weak result does *not* mean that income doesn't matter for health. Rather, 
 
 ## The RENTASALUD app
 
-All the results above are available in an interactive R Shiny application with five tabs:
+All the results above are available in an interactive R Shiny application with six tabs:
 - **Explore** — interactive maps of income, demographics, and life expectancy by census section, with a year slider to see changes over time.
 - **AI Assistant** — ask questions in plain Spanish, answered by a large language model running locally or in the cloud.
 - **Time Series** — see how any indicator has evolved year by year for a selected province.
 - **Relationships** — scatter plots and bar charts exploring the links between income and life expectancy.
 - **Mortality Causes** — interactive bar charts and tables showing how much each cause of death shortens life expectancy.
+- **Methodology** — definitions of indicators, data sources, and citation information.
 
 The app is open source. Code: [github.com/migariane/RENTASALUD](https://github.com/migariane/RENTASALUD). Online version: [shinyapps.io link].
 
