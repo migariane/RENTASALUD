@@ -4,6 +4,13 @@
 ##  Single integrated script for reproducibility.
 ##  Combines: optimize_maps.R + pipeline_esperanza_vida_por_causa.R + global.R
 ##
+##  Directory structure (run from Analysis/):
+##    Analysis/        ← working directory
+##    ../Datos/        ← raw microdata (mp11.txt, smp11cau.txt)
+##    ../Resultados/   ← output CSV + PNG
+##    SHP/             ← raw shapefiles (seccionado_2015-2022)
+##    SHP_opt/         ← optimized shapefiles (.rds)
+##
 ##  Outputs: (see Paso 9 for full list)
 ##    - Tablas de vida (hombres/mujeres)
 ##    - Ganancia de EV por causa
@@ -19,8 +26,19 @@
 ## 0. Configuration: paths and parameters
 ## ---------------------------------------------------------------------------
 
-ruta_mp11     <- "/mnt/user-data/uploads/mp11.txt"       # muestra censal de personas 2011
-ruta_smp11cau <- "/mnt/user-data/uploads/smp11cau.txt"   # fichero de seguimiento + causa
+# Auto-detección de rutas: servidor vs local
+if (dir.exists("/mnt/user-data/uploads")) {
+  ruta_mp11     <- "/mnt/user-data/uploads/mp11.txt"
+  ruta_smp11cau <- "/mnt/user-data/uploads/smp11cau.txt"
+  out_dir       <- "/mnt/user-data/outputs"
+} else {
+  ruta_mp11     <- "../Datos/mp11.txt"
+  ruta_smp11cau <- "../Datos/smp11cau.txt"
+  out_dir       <- "../Resultados"
+}
+stopifnot(file.exists(ruta_mp11))
+stopifnot(file.exists(ruta_smp11cau))
+dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 # Fecha de referencia del Censo de 2011 (1 de noviembre de 2011)
 FECHA_CENSO <- 2011 + 305/366
@@ -34,9 +52,6 @@ codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41")
 # Etiquetas de las bandas de edad
 etiquetas_banda <- c(paste(seq(0, 85, by = 5), seq(4, 89, by = 5), sep = "-"), "90+")
 n_bandas <- length(etiquetas_banda)
-
-# Directorio de salida
-dir.create("/mnt/user-data/outputs", showWarnings = FALSE)
 
 cat("=", strrep("=", 69), "\n")
 cat("  RENTASALUD — Reproducible Analysis Pipeline\n")
@@ -366,8 +381,6 @@ names(ev_provincia_ancho) <- c("provincia", "EV_Hombres", "EV_Mujeres")
 cat("\n\n", strrep("-", 50), "\n")
 cat("  PARTE C: Guardar resultados\n")
 cat("", strrep("-", 50), "\n")
-
-out_dir <- "/mnt/user-data/outputs"
 
 write.csv(resumen, file.path(out_dir, "ganancia_esperanza_vida_por_causa.csv"), row.names = FALSE)
 write.csv(tabla_hombres, file.path(out_dir, "tabla_vida_hombres.csv"), row.names = FALSE)
