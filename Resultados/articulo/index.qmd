@@ -56,7 +56,6 @@ format:
     papersize: a4
     fontsize: 11pt
     linestretch: 1.5
-    number-sections: true
 ---
 
 # What is already known on this topic
@@ -124,3 +123,25 @@ Supported by the Plan Propio de Investigación y Transferencia, University of Gr
 
 # Data Availability
 Analysis code: [github.com/migariane/RENTASALUD](https://github.com/migariane/RENTASALUD). Shiny application: [watzile.shinyapps.io/RENTA](https://watzile.shinyapps.io/RENTA/). BDLPA microdata available from IECA on request.
+
+# References
+
+1. Redondo-Sánchez D, Sánchez MJ, Fernández-Navarro P, Rachet B, Luque-Fernandez MA. Association of socioeconomic deprivation with life expectancy and all-cause mortality in Spain, 2011-2013. *Sci Rep*. 2022;12(1):15554. doi:10.1038/s41598-022-19859-1.
+
+2. Marmot M. *Fair Society, Healthy Lives: The Marmot Review*. London: UCL; 2010.
+
+3. Mackenbach JP, Kulhánová I, Menvielle G, et al. Trends in inequalities in premature mortality: a study of 3.2 million deaths in 13 European countries. *J Epidemiol Community Health*. 2015;69(3):207-17. doi:10.1136/jech-2014-204319.
+
+4. Mackenbach JP, Valverde JR, Artnik B, et al. Trends in health inequalities in 27 European countries. *Proc Natl Acad Sci*. 2018;115(25):6440-5. doi:10.1073/pnas.1800028115.
+
+5. Regidor E, Kunst AE, Rodríguez-Artalejo F, Mackenbach JP. Small socio-economic differences in mortality in Spanish older people. *Eur J Public Health*. 2012;22(1):80-5. doi:10.1093/eurpub/ckr051.
+
+6. Regidor E, Reques L, Belza MJ, et al. Education and mortality in Spain: a review of the literature. *Gac Sanit*. 2014;28(6):492-8. doi:10.1016/j.gaceta.2014.06.001.
+
+7. Chiang CL. *Introduction to Stochastic Processes in Biostatistics*. New York: Wiley; 1968.
+
+8. Beltrán-Sánchez H, Preston SH, Canudas-Romo V. An integrated approach to cause-of-death analysis: cause-deleted life tables and decompositions of life expectancy. *Demogr Res*. 2008;19:1565-602. doi:10.4054/DemRes.2008.19.35.
+
+9. Instituto Nacional de Estadística. Atlas de Distribución de Renta de los Hogares: Metodología. 2024. https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica_C&cid=1254736177088&menu=metodologia.
+
+10. Instituto de Estadística y Cartografía de Andalucía. Estadísticas Longitudinales de Supervivencia y Longevidad en Andalucía: Ficheros de Microdatos, Cohorte 2011. 2024. https://www.juntadeandalucia.es/institutodeestadisticaycartografia/bdlpa/.
