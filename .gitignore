@@ -1,0 +1,34 @@
+# Large data files (obtain separately)
+Datos/mp11.txt
+Datos/smp11cau.txt
+Datos/datos_rentapop_long.csv
+Datos/datos_rentapop_long.RData
+Analysis/datos_rentapop_long.RData
+
+# Shapefiles (obtain from INE separately)
+Analysis/SHP/
+Analysis/SHP_opt/
+Datos/SHP/
+
+# Large R objects
+*.RData
+*.rds
+*.zip
+
+# Compiled outputs
+Resultados/*.csv
+Resultados/*.png
+Resultados/articulo/_manuscript/
+Resultados/articulo/_freeze/
+Resultados/articulo/.quarto/
+Resultados/Figuras/
+
+# R artifacts
+.Rproj.user/
+.Rhistory
+.Rapp.history
+.DS_Store
+.vscode/
+
+# Quarto
+Resultados/articulo/_extensions/
