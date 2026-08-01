@@ -46,7 +46,7 @@ authors:
     email: jmelchor@ugr.es
 abstract: |
   **Background** Interactive tools linking income and life expectancy at fine geographical scales are scarce for southern Europe.
-  **Methods** We linked INE census-section income data (49,888 section-years, 2015–2022) with BDLPA cohort life tables (~637,000 individuals, follow-up 2011–2023) for Andalusia, Spain. Correlation and clustering assessed the income–longevity association.
+  **Methods** We linked INE census-section income data (47,466 section-years, 2015–2022) with BDLPA cohort life tables (~637,000 individuals, follow-up 2011–2023) for Andalusia, Spain. Correlation and clustering assessed the income–longevity association.
   **Results** Life expectancy was 79.5 (men) and 84.4 years (women). Eliminating tumours would yield the largest gain for men (3.93 years), while heart disease accounted for the largest gain among women (2.89 years). The income–life expectancy correlation across provinces was moderate (r = 0.52, 95%CI −0.30 to 0.90, P = 0.19; Spearman ρ = 0.48). Provincial EV ranged from 79.3 (Almería) to 82.7 years (Córdoba), a gradient of 3.4 years. An R Shiny application integrates all findings in six interactive tabs.
   **Conclusion** RENTASALUD provides an open tool for exploring health inequalities. The moderate provincial income–EV correlation is compatible with much steeper census-tract gradients reported nationally. Aggregation at the province level attenuates the association.
   **Keywords:** health inequalities; life expectancy; spatial epidemiology; interactive atlas; Shiny; Andalusia
@@ -72,7 +72,7 @@ RENTASALUD was built to fill this gap. It is an open-source web atlas that combi
 
 ## Data sources
 
-We used two main datasets. The first comes from the INE's *Atlas de Distribución de Renta de los Hogares*, covering all eight Andalusian provinces from 2015 to 2022. It includes nearly 50,000 census section–year observations with information on median income, age structure, household composition, and population size — all at the neighbourhood level.
+We used two main datasets. The first comes from the INE's *Atlas de Distribución de Renta de los Hogares*, covering all eight Andalusian provinces from 2015 to 2022. It includes over 47,000 census section–year observations with information on median income, age structure, household composition, and population size — all at the neighbourhood level.
 
 The second dataset is the BDLPA, which follows a random 10% sample of people who lived in Andalusia at the time of the 2011 census (~637,000 individuals). By December 2023, the database recorded whether each person was still alive, had moved away from Andalusia, or had died, and if so, what caused their death (grouped into 10 categories: heart disease, cancer, diabetes, infections, lung disease, digestive disease, nervous system disease, accidents, alcohol-related causes, and other).
 
@@ -113,7 +113,7 @@ Life expectancy varies markedly across the eight Andalusian provinces (Table 1).
 
 ## What would happen if we eliminated major causes of death?
 
-If cancer were eliminated, men would gain about 3.9 years of life expectancy and women about 2.8 years (Table 2). For women, eliminating heart disease would have a slightly larger effect (2.9 years). Together, cancer and heart disease account for roughly 7 years of potential gain for men and nearly 6 for women — the two biggest targets for prevention.
+If cancer were eliminated, men would gain about 3.9 years of life expectancy and women about 2.8 years (Table 2). For women, eliminating heart disease would have a slightly larger effect (2.9 years). Together, cancer and heart disease account for about 7.1 years of potential gain for men and 5.7 for women — the two biggest targets for prevention.
 
 | Cause | Men (years) | Women (years) |
 |---|---|---|
@@ -156,7 +156,7 @@ The app is open source. Code: [github.com/migariane/RENTASALUD](https://github.c
 
 ## What we found
 
-RENTASALUD brings together, for the first time, detailed neighbourhood-level income data with life expectancy estimates for Andalusia. Life expectancy (79.5 for men, 84.4 for women) is below the Spanish average, which is consistent with the region's lower income levels. Cancer and heart disease are the main drivers of early death — together accounting for about 7 years of potential life expectancy gain in men. These findings highlight the continued importance of screening programmes, cardiovascular prevention, and smoking cessation. The larger impact of cancer in men (+1.1 years) reflects Spain's history of higher smoking rates among men, although this gap is closing in younger generations.
+RENTASALUD brings together, for the first time, detailed neighbourhood-level income data with life expectancy estimates for Andalusia. Life expectancy (79.5 for men, 84.4 for women) is below the Spanish average, which is consistent with the region's lower income levels. Cancer and heart disease are the main drivers of early death — together accounting for about 7.1 years of potential life expectancy gain in men and 5.7 in women. These findings highlight the continued importance of screening programmes, cardiovascular prevention, and smoking cessation. The larger impact of cancer in men (+1.1 years) reflects Spain's history of higher smoking rates among men, although this gap is closing in younger generations.
 
 ## Why the income–health link attenuates at the provincial level
 
@@ -176,7 +176,7 @@ However, there are important limitations. First, life expectancy could only be c
 # What this study adds
 - RENTASALUD is the first open-source interactive atlas of neighbourhood-level income and life expectancy for Andalusia.
 - At the province level, a moderate income–life expectancy gradient is observed (r = 0.52), with a 3.4-year spread in mean EV (79.3 in Almería to 82.7 in Córdoba), though wide confidence intervals reflect the small sample size.
-- Cancer and heart disease together account for about 7 years of potential life expectancy gain in men.
+- Cancer and heart disease together account for about 7.1 years of potential life expectancy gain in men and 5.7 in women.
 - An AI-powered natural language interface lets anyone explore the data without technical training.
 
 # Acknowledgements
