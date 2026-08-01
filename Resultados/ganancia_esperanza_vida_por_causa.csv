@@ -1,0 +1,21 @@
+"sexo","causa","esperanza_vida_observada","esperanza_vida_sin_causa","ganancia_anos"
+"Hombres","Tumores malignos",79.53,83.46,3.93
+"Hombres","Enfermedades del sistema circulatorio",79.53,82.68,3.15
+"Hombres","Enfermedades del sistema respiratorio",79.53,80.65,1.13
+"Hombres","Resto de causas",79.53,80.65,1.13
+"Hombres","Causas externas (accidentes, suicidio...)",79.53,80.2,0.67
+"Hombres","Enfermedades del aparato digestivo",79.53,80.1,0.57
+"Hombres","Enfermedades del sistema nervioso",79.53,80.02,0.5
+"Hombres","Enfermedades infecciosas",79.53,79.94,0.41
+"Hombres","Enfermedades endocrinas (diabetes, etc.)",79.53,79.8,0.28
+"Hombres","Causas relacionadas con el alcohol",79.53,79.59,0.07
+"Mujeres","Enfermedades del sistema circulatorio",84.35,87.24,2.89
+"Mujeres","Tumores malignos",84.35,87.19,2.83
+"Mujeres","Resto de causas",84.35,85.54,1.19
+"Mujeres","Enfermedades del sistema respiratorio",84.35,85.05,0.69
+"Mujeres","Enfermedades del sistema nervioso",84.35,84.93,0.57
+"Mujeres","Enfermedades del aparato digestivo",84.35,84.84,0.48
+"Mujeres","Enfermedades infecciosas",84.35,84.7,0.35
+"Mujeres","Causas externas (accidentes, suicidio...)",84.35,84.69,0.33
+"Mujeres","Enfermedades endocrinas (diabetes, etc.)",84.35,84.67,0.32
+"Mujeres","Causas relacionadas con el alcohol",84.35,84.37,0.02

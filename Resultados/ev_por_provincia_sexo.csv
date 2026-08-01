@@ -1,0 +1,17 @@
+"provincia","sexo","esperanza_vida_nacer","n_personas","n_muertes"
+"Almeria","Hombres",77.67,41805,4767
+"Almeria","Mujeres",80.87,43678,4569
+"Cadiz","Hombres",80.13,43500,4754
+"Cadiz","Mujeres",85.03,47335,4385
+"Cordoba","Hombres",80.06,38714,4303
+"Cordoba","Mujeres",85.34,40155,4173
+"Granada","Hombres",79.89,27668,3179
+"Granada","Mujeres",85.16,28535,2781
+"Huelva","Hombres",79.79,32603,3734
+"Huelva","Mujeres",84.64,34012,3560
+"Jaen","Hombres",79.74,29587,3564
+"Jaen","Mujeres",85.12,31036,3198
+"Malaga","Hombres",79.81,39762,4381
+"Malaga","Mujeres",84.88,42215,3950
+"Sevilla","Hombres",80.02,38013,4158
+"Sevilla","Mujeres",85.17,39982,3827
