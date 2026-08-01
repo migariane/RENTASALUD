@@ -1,25 +1,18 @@
 ---
 title: "RENTASALUD: a web-based interactive atlas of social inequalities and life expectancy in Andalusia (southern Spain)"
 authors:
-  - name: Miguel Ángel Luque-Fernández
-    affiliations:
-      - name: Department of Statistics and Operations Research, University of Granada
-        city: Granada
-        country: Spain
-    email: mluquefe@ugr.es
-    corresponding: true
-  - name: Paloma Massó Guijarro
-    affiliations:
-      - name: Department of Preventive Medicine and Public Health, University of Granada
-        city: Granada
-        country: Spain
-    email: pmasso@ugr.es
   - name: Gustavo Rivas Gervilla
     affiliations:
       - name: Department of Statistics and Operations Research, University of Granada
         city: Granada
         country: Spain
     email: griger@ugr.es
+  - name: Paloma Massó Guijarro
+    affiliations:
+      - name: Department of Preventive Medicine and Public Health, University of Granada
+        city: Granada
+        country: Spain
+    email: pmasso@ugr.es
   - name: Maja Nikšić
     affiliations:
       - name: Centre for Health Services Studies, University of Kent
@@ -44,12 +37,20 @@ authors:
         city: Granada
         country: Spain
     email: jmelchor@ugr.es
+  - name: Miguel Ángel Luque-Fernández
+    affiliations:
+      - name: Department of Statistics and Operations Research, University of Granada
+        city: Granada
+        country: Spain
+    email: mluquefe@ugr.es
+    corresponding: true
 abstract: |
   **Background** Interactive tools linking income and life expectancy at fine geographical scales are scarce for southern Europe.
   **Methods** We linked INE census-section income data (48,262 section-years, 2015–2022) with BDLPA cohort life tables (~637,000 individuals, follow-up 2011–2023) for Andalusia, Ceuta, and Melilla. Correlation and clustering assessed the income–longevity association.
   **Results** Life expectancy was 79.5 (men) and 84.4 years (women). Eliminating tumours would yield the largest gain for men (3.93 years), while heart disease accounted for the largest gain among women (2.89 years). The income–life expectancy correlation across ten provinces was weak (r = 0.28, 95%CI −0.42 to 0.77, P = 0.43; Spearman ρ = 0.24). Provincial EV ranged from 79.4 (Almería) to 82.7 years (Córdoba), a gradient of 3.3 years. An R Shiny application integrates all findings in six interactive tabs.
   **Conclusion** RENTASALUD provides an open tool for exploring health inequalities. The weak provincial income–EV correlation is compatible with the much steeper census-tract gradients reported nationally. Aggregation at the province level attenuates the association; income outliers (Ceuta, Melilla) further weaken it.
   **Keywords:** health inequalities; life expectancy; spatial epidemiology; interactive atlas; Shiny; Andalusia
+  **\* Equal contribution.** GRG and PMG contributed equally as co-first authors.
 date: today
 bibliography: references.bib
 format:
@@ -72,9 +73,9 @@ RENTASALUD is an open source web atlas. It draws on census-section data from Spa
 
 ## Data sources
 
-The income and demographic data come from the INE *Atlas de Distribución de Renta de los Hogares*, which covers the eight Andalusian provinces and the autonomous cities of Ceuta and Melilla for the period 2015–2022. It contains over 48,000 census section–year observations: median income, age structure, household size and composition, and total population.
+The income and demographic data come from the INE *Atlas de Distribución de Renta de los Hogares* [@ine_adrh_metodologia], which covers the eight Andalusian provinces and the autonomous cities of Ceuta and Melilla for the period 2015–2022. It contains over 48,000 census section–year observations: median income, age structure, household size and composition, and total population.
 
-The mortality data come from the BDLPA, a random 10% sample of everyone who lived in Andalusia at the 2011 census, followed through December 2023 [@BDLPA]. For each person the database records whether they were still alive, had moved away, or had died. When a death occurred, the cause is coded into one of ten broad groups: heart and circulatory disease, malignant tumours, diabetes and endocrine conditions, infectious disease, respiratory disease, digestive disease, nervous system disorders, external causes (accidents and suicide), alcohol-related causes, and all other causes.
+The mortality data come from the BDLPA [@ieca_bdlpa_metodologia], a random 10% sample of everyone who lived in Andalusia at the 2011 census, followed through December 2023. For each person the database records whether they were still alive, had moved away, or had died. When a death occurred, the cause is coded into one of ten broad groups: heart and circulatory disease, malignant tumours, diabetes and endocrine conditions, infectious disease, respiratory disease, digestive disease, nervous system disorders, external causes (accidents and suicide), alcohol-related causes, and all other causes.
 
 ## Life expectancy estimation
 
