@@ -46,6 +46,14 @@ renta_provincia <- datos %>%
             EV_Media = mean(EV_Media, na.rm = TRUE),
             .groups = "drop")
 
+# ── Sensibilidad: solo provincias andaluzas (sin Ceuta ni Melilla) ──
+andalucia_solo <- c("Almeria","Cadiz","Cordoba","Granada","Huelva","Jaen","Malaga","Sevilla")
+renta_provincia_and <- renta_provincia %>% filter(Provincia %in% andalucia_solo)
+
+# ── Correlaciones (con y sin Ceuta/Melilla) ──
+corr_all <- cor.test(renta_provincia$Renta_Media, renta_provincia$EV_Media)
+corr_and <- cor.test(renta_provincia_and$Renta_Media, renta_provincia_and$EV_Media)
+
 # ── Carga de ganancia de EV por causa (desde el pipeline) ──
 ruta_ganancia <- if (file.exists("../Resultados/ganancia_esperanza_vida_por_causa.csv")) {
   "../Resultados/ganancia_esperanza_vida_por_causa.csv"
@@ -106,7 +114,7 @@ indicadores_completos <- c(
   "Esperanza Vida (Media)" = "EV_Media"
 )
 
-codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41")
+codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41", "51", "52")
 
 ollama_running <- tryCatch({
   con <- url("http://localhost:11434/api/tags", open = "rb")
@@ -134,6 +142,10 @@ format_value <- function(valor, indicador) {
     "menor_18" = , "mayor_65" = , "hogares_uni" = ,
     "pob_esp" = , "pob_extranjera" = paste0(round(valor, 1), "%"),
     "Renta_Quintil" = paste0("Q", round(valor)),
+    "brecha_p90p10" = paste0(round(valor, 1), "x"),
+    "brecha_q1_q5" = paste0(round(valor, 1), "x"),
+    "q1_renta" = paste0(format(round(valor), big.mark = ".", decimal.mark = ","), " €"),
+    "q5_renta" = paste0(format(round(valor), big.mark = ".", decimal.mark = ","), " €"),
     "edad_media" = paste0(round(valor, 1), " años"),
     "tam_hogar" = round(valor, 2),
     "EV_Hombres" = , "EV_Mujeres" = , "EV_Media" = paste0(round(valor, 1), " años"),

@@ -46,9 +46,9 @@ authors:
     email: jmelchor@ugr.es
 abstract: |
   **Background** Interactive tools linking income and life expectancy at fine geographical scales are scarce for southern Europe.
-  **Methods** We linked INE census-section income data (47,466 section-years, 2015–2022) with BDLPA cohort life tables (~637,000 individuals, follow-up 2011–2023) for Andalusia, Spain. Correlation and clustering assessed the income–longevity association.
-  **Results** Life expectancy was 79.5 (men) and 84.4 years (women). Eliminating tumours would yield the largest gain for men (3.93 years), while heart disease accounted for the largest gain among women (2.89 years). The income–life expectancy correlation across provinces was moderate (r = 0.52, 95%CI −0.30 to 0.90, P = 0.19; Spearman ρ = 0.48). Provincial EV ranged from 79.3 (Almería) to 82.7 years (Córdoba), a gradient of 3.4 years. An R Shiny application integrates all findings in six interactive tabs.
-  **Conclusion** RENTASALUD provides an open tool for exploring health inequalities. The moderate provincial income–EV correlation is compatible with much steeper census-tract gradients reported nationally. Aggregation at the province level attenuates the association.
+  **Methods** We linked INE census-section income data (48,262 section-years, 2015–2022) with BDLPA cohort life tables (~637,000 individuals, follow-up 2011–2023) for Andalusia, Ceuta, and Melilla. Correlation and clustering assessed the income–longevity association.
+  **Results** Life expectancy was 79.5 (men) and 84.4 years (women). Eliminating tumours would yield the largest gain for men (3.93 years), while heart disease accounted for the largest gain among women (2.89 years). The income–life expectancy correlation across ten provinces was weak (r = 0.28, 95%CI −0.42 to 0.77, P = 0.43; Spearman ρ = 0.24). Provincial EV ranged from 79.4 (Almería) to 82.7 years (Córdoba), a gradient of 3.3 years. An R Shiny application integrates all findings in six interactive tabs.
+  **Conclusion** RENTASALUD provides an open tool for exploring health inequalities. The weak provincial income–EV correlation is compatible with the much steeper census-tract gradients reported nationally. Aggregation at the province level attenuates the association; income outliers (Ceuta, Melilla) further weaken it.
   **Keywords:** health inequalities; life expectancy; spatial epidemiology; interactive atlas; Shiny; Andalusia
 date: today
 bibliography: references.bib
@@ -66,13 +66,13 @@ How big is the gap when we look at small areas like neighbourhoods or census tra
 
 Andalusia, home to about 8.5 million people, is Spain's largest region and one of its most economically disadvantaged. Despite this, there are few interactive tools that let people explore how income, demographics, and life expectancy come together at the neighbourhood level. Most existing maps are either too coarse (showing only whole provinces) or lack the interactive features that would make them useful for policymakers, researchers, or the public.
 
-RENTASALUD was built to fill this gap. It is an open-source web atlas that combines detailed census-section data from Spain's National Statistics Institute (INE, 2015–2022) with life expectancy estimates from the Longitudinal Database of the Andalusian Population (BDLPA), which follows about 637,000 people from the 2011 census through to 2023. Our aims were: (i) to estimate life expectancy by province and sex; (ii) to see how much longer people would live if certain causes of death were eliminated; (iii) to examine the relationship between income and life expectancy; and (iv) to build an interactive tool that anyone can use.
+RENTASALUD was built to fill this gap. It is an open-source web atlas that combines detailed census-section data from Spain's National Statistics Institute (INE, 2015–2022) with life expectancy estimates from the Longitudinal Database of the Andalusian Population (BDLPA), which follows about 637,000 people from the 2011 census through to 2023. The analysis covers the eight Andalusian provinces plus the autonomous cities of Ceuta and Melilla. Our aims were: (i) to estimate life expectancy by province and sex; (ii) to see how much longer people would live if certain causes of death were eliminated; (iii) to examine the relationship between income and life expectancy; and (iv) to build an interactive tool that anyone can use.
 
 # Methods
 
 ## Data sources
 
-We used two main datasets. The first comes from the INE's *Atlas de Distribución de Renta de los Hogares*, covering all eight Andalusian provinces from 2015 to 2022. It includes over 47,000 census section–year observations with information on median income, age structure, household composition, and population size — all at the neighbourhood level.
+We used two main datasets. The first comes from the INE's *Atlas de Distribución de Renta de los Hogares*, covering the eight Andalusian provinces plus the autonomous cities of Ceuta and Melilla from 2015 to 2022. It includes over 48,000 census section–year observations with information on median income, age structure, household composition, and population size — all at the neighbourhood level.
 
 The second dataset is the BDLPA, which follows a random 10% sample of people who lived in Andalusia at the time of the 2011 census (~637,000 individuals). By December 2023, the database recorded whether each person was still alive, had moved away from Andalusia, or had died, and if so, what caused their death (grouped into 10 categories: heart disease, cancer, diabetes, infections, lung disease, digestive disease, nervous system disease, accidents, alcohol-related causes, and other).
 
@@ -80,11 +80,11 @@ The second dataset is the BDLPA, which follows a random 10% sample of people who
 
 We used standard life table methods [@chiang1968] to estimate how long a newborn would be expected to live if current death rates stayed the same. We grouped ages into standard 5-year bands (0–4, 5–9, ..., 85–89) with an open-ended band for 90 and over. We also calculated what life expectancy would be if each cause of death were eliminated — a standard demographic technique called cause-deleted life tables [@beltran-sanchez2008].
 
-Life expectancy was calculated at the province level (8 provinces × 2 sexes = 16 tables). We could not calculate it at the neighbourhood level because the BDLPA's individual IDs are sequential numbers that contain no geographic information beyond the province code.
+Life expectancy was calculated at the province level (8 provinces + 2 autonomous cities × 2 sexes = 20 tables). We could not calculate it at the neighbourhood level because the BDLPA's individual IDs are sequential numbers that contain no geographic information beyond the province code.
 
 ## Analysing income and life expectancy
 
-We looked at the relationship between average income and life expectancy across the eight provinces using two approaches: simple correlation (Pearson and Spearman) and hierarchical clustering (to see which provinces group together). These analyses are exploratory — with only eight provinces, we have limited ability to detect patterns.
+We looked at the relationship between average income and life expectancy across the ten territories using two approaches: simple correlation (Pearson and Spearman) and hierarchical clustering (to see which provinces group together). These analyses are exploratory — with only ten data points, we have limited ability to detect patterns.
 
 ## Ethics
 
@@ -96,20 +96,22 @@ The study was approved by the University of Granada Ethics Committee (SOCESVIDA,
 
 A baby born in Andalusia can expect to live about 79.5 years if male and 84.4 years if female — a gap of nearly 5 years. This difference reflects higher rates of heart disease, lung cancer, and accidents among men. Life expectancy falls steadily with age: a 65-year-old man can expect about 19.9 more years and a woman about 23.5; at age 85, the remaining years are 7.3 for men and 8.4 for women.
 
-Life expectancy varies markedly across the eight Andalusian provinces (Table 1). Almería has the lowest values (77.7 years for men, 80.9 for women), while Córdoba and Sevilla lead (80.1 and 85.3 in Córdoba; 80.0 and 85.2 in Sevilla). The provincial gap is about 2.5 years for men and 4.5 years for women — a gradient that, while narrower than the 3-to-4-year gap reported between deprived and wealthy neighbourhoods at the national level [@redondo2022], is nevertheless substantial and widens for women.
+Life expectancy varies across the ten territories (Table 1). Almería has the lowest values (77.8 years for men, 81.1 for women), while Córdoba leads (80.1 and 85.3). The gap is about 2.3 years for men and 4.2 years for women. Ceuta and Melilla occupy intermediate positions: Ceuta (79.8 men, 84.7 women) and Melilla (79.8 men, 85.1 women) fall squarely within the Andalusian range despite having substantially higher median incomes (16,899 € and 15,443 € respectively vs. the Andalusian average of ~13,300 €). This discrepancy — higher income without correspondingly higher life expectancy — weakens the overall income–EV association and reflects the distinctive economic structure of these border cities.
 
 | Province | Men (years) | Women (years) |
 |---|---|---|
-| Almería | 77.7 | 80.9 |
-| Cádiz | 80.1 | 85.0 |
-| Córdoba | 80.1 | 85.3 |
-| Granada | 79.9 | 85.2 |
-| Huelva | 79.8 | 84.6 |
-| Jaén | 79.7 | 85.1 |
-| Málaga | 79.8 | 84.9 |
+| Almería | 77.8 | 81.1 |
+| Jaén | 79.7 | 84.9 |
+| Málaga | 79.6 | 84.8 |
+| Ceuta | 79.8 | 84.7 |
+| Melilla | 79.8 | 85.1 |
+| Granada | 79.8 | 85.1 |
+| Huelva | 79.9 | 84.5 |
+| Cádiz | 80.0 | 85.0 |
 | Sevilla | 80.0 | 85.2 |
+| Córdoba | 80.1 | 85.3 |
 
-: Life expectancy at birth by province and sex.
+: Life expectancy at birth by province and sex (ordered by male EV ascending). Ceuta and Melilla are autonomous cities.
 
 ## What would happen if we eliminated major causes of death?
 
@@ -134,11 +136,27 @@ Men lose more years to cancer than women do (+1.1 years), which reflects histori
 
 ## Does income relate to life expectancy?
 
-At the provincial level, the link between income and life expectancy was moderate but not statistically significant (r = 0.52, 95% CI: −0.30 to 0.90, P = 0.19; Spearman ρ = 0.48, P = 0.24). With only eight provinces, the confidence interval is wide: the observed 0.52 correlation is compatible with both a strong positive association and a near-null one. The direction is consistent with the expected pattern — provinces with higher median income (Sevilla, 14,338 €; Málaga, 13,666 €) tend to show higher life expectancy, while lower-income provinces (Almería, 12,699 €; Jaén, 12,760 €) show lower values. The cluster analysis grouped Sevilla, Málaga, Córdoba, and Granada together (higher income and longevity) and Almería, Huelva, and Jaén together (lower on both dimensions), with Cádiz as an intermediate case — an above-median income level paired with mid-range life expectancy.
+At the provincial level, the link between income and life expectancy was weak and not statistically significant (r = 0.28, 95% CI: −0.42 to 0.77, P = 0.43; Spearman ρ = 0.24, P = 0.51). The two autonomous cities — Ceuta (16,899 € median income, 82.2 years mean EV) and Melilla (15,443 €, 82.4 years) — act as leverage points: their incomes substantially exceed the Andalusian average (12,699–14,338 €) yet their life expectancy is mid-range, pulling the regression slope towards zero. Removing them increases the correlation to r = 0.52 (P = 0.19). The direction of association is positive but imprecise: with only ten data points, the confidence interval spans from moderate negative to strong positive. The 3.3-year spread in mean provincial EV (79.4 in Almería to 82.7 in Córdoba) confirms a real territorial gradient exists even at this coarse scale.
 
-![Scatter plot of income vs. life expectancy. Each dot is a province. The dashed line shows the linear trend (R^2 = 0.27, P = 0.19). 95% confidence bands shown in grey.](figures/renta_vs_ev_scatter.png){#fig-scatter}
+![Scatter plot of income vs. life expectancy. Each point is a province or autonomous city. Ceuta and Melilla (red) are income outliers that weaken the provincial trend. The dashed line shows linear fit (R² = 0.08, P = 0.43).](figures/renta_vs_ev_scatter.png){#fig-scatter}
 
-The moderate but imprecise correlation at the provincial level does *not* mean that income is unrelated to health. Rather, the wide confidence intervals (driven by only eight data points) caution against over-interpreting the provincial trend. When Redondo-Sánchez et al. [@redondo2022] looked at individual neighbourhoods rather than whole provinces, they found a steep gradient (3.8 years for men, 3.2 for women between deprivation extremes). The contrast between these two scales illustrates a classic geographical phenomenon: aggregating data into larger units attenuates — but does not eliminate — the association. The 3.4-year spread in mean provincial EV (79.3 to 82.7) suggests a real territorial gradient exists; within-province disparities are likely even larger.
+This weak aggregate result does *not* mean that income is unrelated to health. When Redondo-Sánchez et al. [@redondo2022] looked at individual neighbourhoods rather than whole provinces, they found a steep gradient (3.8 years for men, 3.2 for women between deprivation extremes). The contrast illustrates how aggregation attenuates association, especially when units differ in economic structure. The practical implication is clear: neighbourhood-level data are needed to detect the income–health gradient, and unit-level solutions like RENTASALUD can help identify where interventions are most needed.
+
+### Sensitivity: with and without Ceuta and Melilla
+
+Ceuta and Melilla are autonomous cities with economic structures distinct from the eight Andalusian provinces — their income is driven by cross-border trade, a large public sector, and special tax regimes. To assess their influence on the income–EV association, we repeated the correlation analysis excluding them (Table 3).
+
+| | 10 territories | 8 provinces (Andalusia only) |
+|---|---|---|
+| Pearson r (95% CI) | 0.28 (−0.42, 0.77) | 0.52 (−0.30, 0.90) |
+| P-value | 0.43 | 0.19 |
+| Spearman ρ | 0.24 (P = 0.51) | 0.48 (P = 0.24) |
+| R² | 0.08 | 0.27 |
+| EV spread (mean) | 3.3 years | 3.4 years |
+
+: Income–life expectancy correlation with and without Ceuta and Melilla.
+
+Removing Ceuta and Melilla more than doubles the explained variance (R² from 0.08 to 0.27) and shifts the correlation from weak to moderate, though it remains non-significant at the 5% level due to the small sample size. This suggests that the income–EV association operates differently in territories with distinct economic structures and highlights the sensitivity of aggregate ecological analyses to the inclusion of heterogeneous units.
 
 ## The RENTASALUD app
 
@@ -156,11 +174,11 @@ The app is open source. Code: [github.com/migariane/RENTASALUD](https://github.c
 
 ## What we found
 
-RENTASALUD brings together, for the first time, detailed neighbourhood-level income data with life expectancy estimates for Andalusia. Life expectancy (79.5 for men, 84.4 for women) is below the Spanish average, which is consistent with the region's lower income levels. Cancer and heart disease are the main drivers of early death — together accounting for about 7.1 years of potential life expectancy gain in men and 5.7 in women. These findings highlight the continued importance of screening programmes, cardiovascular prevention, and smoking cessation. The larger impact of cancer in men (+1.1 years) reflects Spain's history of higher smoking rates among men, although this gap is closing in younger generations.
+RENTASALUD brings together, for the first time, detailed neighbourhood-level income data with life expectancy estimates for Andalusia, Ceuta, and Melilla. Life expectancy (79.5 for men, 84.4 for women) is below the Spanish average, which is consistent with the region's lower income levels. Cancer and heart disease are the main drivers of early death — together accounting for about 7.1 years of potential life expectancy gain in men and 5.7 in women. These findings highlight the continued importance of screening programmes, cardiovascular prevention, and smoking cessation. The larger impact of cancer in men (+1.1 years) reflects Spain's history of higher smoking rates among men, although this gap is closing in younger generations.
 
 ## Why the income–health link attenuates at the provincial level
 
-The correlation between income and life expectancy at the provincial level (r = 0.52, P = 0.19) is moderate but imprecise, contrasting with the steep and precise gradient found at the neighbourhood level (a gap of 3.8 years for men and 3.2 for women between the most and least deprived areas) [@redondo2022]. This attenuation is expected when aggregating data from thousands of census tracts into eight provinces. The 3.4-year spread in provincial life expectancy (79.3 to 82.7 years) mirrors, at the aggregate scale, the direction of the neighbourhood-level gradient. The Southern European pattern of smaller health inequalities [@mackenbach2018; @regidor2012] does not mean there is no inequality — it means the gradient operates at a finer scale and may be softened by factors like the Mediterranean diet, social networks, and universal healthcare. The practical implication is clear: policies should target the most disadvantaged neighbourhoods, not whole provinces. RENTASALUD is designed to help identify exactly where those neighbourhoods are.
+The correlation between income and life expectancy at the provincial level (r = 0.28, P = 0.43) is weak and imprecise, contrasting with the steep and precise gradient found at the neighbourhood level (a gap of 3.8 years for men and 3.2 for women between the most and least deprived areas) [@redondo2022]. Two factors contribute to this attenuation. First, aggregating data from thousands of census tracts into ten provincial units inevitably reduces variance and statistical power. Second, Ceuta and Melilla — autonomous cities with high median incomes (16,899 € and 15,443 €) driven by cross-border trade and public-sector employment — have mid-range life expectancy (82.2 and 82.4 years), pulling the provincial correlation toward zero. When these two cities are excluded, the correlation rises to r = 0.52 among the eight Andalusian provinces, suggesting that the income–EV association may operate differently in territories with distinct economic structures. The 3.3-year spread in provincial life expectancy (79.4 to 82.7 years) mirrors, at the aggregate scale, the direction of the neighbourhood-level gradient. The Southern European pattern of smaller health inequalities [@mackenbach2018; @regidor2012] does not mean there is no inequality — it means the gradient operates at a finer scale and may be softened by factors like the Mediterranean diet, social networks, and universal healthcare. The practical implication is clear: policies should target the most disadvantaged neighbourhoods, not whole provinces. RENTASALUD is designed to help identify exactly where those neighbourhoods are.
 
 ## Strengths and limitations
 
@@ -172,10 +190,11 @@ However, there are important limitations. First, life expectancy could only be c
 - In Spain, people in the most deprived neighbourhoods live 3 to 4 years less than those in the wealthiest.
 - Southern Europe has somewhat smaller health inequalities than Northern or Eastern Europe.
 - Few interactive tools exist that let people explore income and life expectancy together at the neighbourhood level.
+- Autonomous cities with high border-trade income (Ceuta, Melilla) may not follow typical income–health gradients.
 
 # What this study adds
-- RENTASALUD is the first open-source interactive atlas of neighbourhood-level income and life expectancy for Andalusia.
-- At the province level, a moderate income–life expectancy gradient is observed (r = 0.52), with a 3.4-year spread in mean EV (79.3 in Almería to 82.7 in Córdoba), though wide confidence intervals reflect the small sample size.
+- RENTASALUD is the first open-source interactive atlas of neighbourhood-level income and life expectancy for Andalusia, Ceuta, and Melilla.
+- At the province level, the income–life expectancy correlation is weak (r = 0.28, P = 0.43), with a 3.3-year spread in mean EV (79.4 in Almería to 82.7 in Córdoba). Ceuta and Melilla are income outliers that weaken the aggregate association.
 - Cancer and heart disease together account for about 7.1 years of potential life expectancy gain in men and 5.7 in women.
 - An AI-powered natural language interface lets anyone explore the data without technical training.
 

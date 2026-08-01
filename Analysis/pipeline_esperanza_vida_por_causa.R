@@ -164,7 +164,7 @@ ID   <- substr(lineas, 1, 6)
 # variable por delante), así que la localizamos buscando, en la zona
 # donde debería estar, un código de 2 dígitos que sea uno de los 8
 # códigos válidos de provincia andaluza.
-codigos_provincia_validos <- c("04","11","14","18","21","23","29","41")
+codigos_provincia_validos <- c("04","11","14","18","21","23","29","41","51","52")
 
 localizar_provincia <- function(linea, p0) {
   # p0 es la posición (0-indexada) de inicio de FNAC en esa línea.
@@ -527,7 +527,9 @@ nombres_provincia <- c(
   "21" = "Huelva",
   "23" = "Jaen",
   "29" = "Malaga",
-  "41" = "Sevilla"
+  "41" = "Sevilla",
+  "51" = "Ceuta",
+  "52" = "Melilla"
 )
 
 cat("\n\n=====================================================================\n")

@@ -48,7 +48,7 @@ ui <- page_navbar(
       ),
 
       layout_columns(
-        col_widths = c(3, 3, 3, 3), fill = FALSE,
+        col_widths = c(2, 2, 2, 3, 3), fill = FALSE,
         value_box("Población", textOutput("total_pob"),
                   showcase = bsicons::bs_icon("people-fill"), theme = "primary"),
         value_box("Renta Mediana", textOutput("renta_media"),
@@ -56,7 +56,9 @@ ui <- page_navbar(
         value_box("Edad Media", textOutput("edad_prom"),
                   showcase = bsicons::bs_icon("person"), theme = "info"),
         value_box("Esperanza Vida", textOutput("ev_prom"),
-                  showcase = bsicons::bs_icon("heart-pulse"), theme = "danger")
+                  showcase = bsicons::bs_icon("heart-pulse"), theme = "danger"),
+        value_box("Brecha P90/P10", textOutput("brecha"),
+                  showcase = bsicons::bs_icon("arrow-left-right"), theme = "warning")
       ),
 
       div(class = "narrative-card",
@@ -95,7 +97,25 @@ ui <- page_navbar(
       sidebar = sidebar(
         width = 300,
         selectInput("ts_prov", "Provincia:", choices = provincias_disponibles, selected = "Granada"),
-        selectInput("ts_ind", "Indicador:", choices = indicadores_completos, selected = "Renta_Mediana_UC"),
+        selectInput("ts_ind", "Indicador:",
+          choices = c(
+            "Renta Mediana (€)" = "Renta_Mediana_UC",
+            "Brecha P90/P10" = "brecha_p90p10",
+            "Brecha Q1 vs Q5" = "brecha_q1_q5",
+            "Renta media Q1 (más pobre)" = "q1_renta",
+            "Renta media Q5 (más rico)" = "q5_renta",
+            "Edad Media" = "edad_media",
+            "% Menores de 18 años" = "menor_18",
+            "% Mayores de 65 años" = "mayor_65",
+            "Tamaño Medio del Hogar" = "tam_hogar",
+            "% Hogares Unipersonales" = "hogares_uni",
+            "% Población Española" = "pob_esp",
+            "% Población Extranjera" = "pob_extranjera",
+            "Esperanza Vida (Hombres)" = "EV_Hombres",
+            "Esperanza Vida (Mujeres)" = "EV_Mujeres",
+            "Esperanza Vida (Media)" = "EV_Media"
+          ),
+          selected = "Renta_Mediana_UC"),
         hr(),
         p(strong("Estadísticos descriptivos"), style = "color:#1a5276; font-weight:600;"),
         div(style = "background:#eaf2f8; border-radius:8px; padding:12px; margin-top:6px;",
@@ -191,7 +211,7 @@ ui <- page_navbar(
             col_widths = c(7, 5),
             card(
               full_screen = TRUE,
-              card_header("Años ganados al eliminar cada causa"),
+              card_header("Años ganados al eliminar cada causa (tumores: primera causa)"),
               card_body(plotlyOutput("causas_ganancia_plot", height = "450px"))
             ),
             card(
@@ -265,6 +285,23 @@ ui <- page_navbar(
         p("BDLPA — Base de Datos Longitudinal de Población de Andalucía (Estadísticas Longitudinales de Supervivencia y Longevidad en Andalucía, cohorte censal 2011, seguimiento hasta 2023). Instituto de Estadística y Cartografía de Andalucía (IECA) y Universidad de Granada.")
       ),
 
+      h2("Cómo citar"),
+      div(class = "definition-card",
+        p(style = "font-size:0.9em;",
+          "Si utilizas esta aplicación en una publicación, por favor cítala como:"),
+        p(style = "font-size:0.85em; background:#eaf2f8; padding:12px; border-radius:6px; font-style:italic;",
+          "Luque-Fernández MA, Massó Guijarro P, Rivas Gervilla G, Nikšić M, Rivera Izquierdo M, ",
+          "Montero Alonso MÁ, Melchor Rodríguez JM. ",
+          "RENTASALUD: A Web-Based Interactive Atlas of Social Inequalities and Life Expectancy ",
+          "in Andalusia (Southern Spain). University of Granada; 2025. DOI: 10.5281/zenodo.21237758"),
+        p(style = "margin-top:10px;",
+          tags$img(src = "https://zenodo.org/badge/DOI/10.5281/zenodo.21237758.svg",
+                   height = "20", style = "vertical-align:middle;"),
+          HTML("&nbsp;"),
+          tags$a(href = "https://doi.org/10.5281/zenodo.21237758",
+                 target = "_blank", "https://doi.org/10.5281/zenodo.21237758"))
+      ),
+
       h2("Autoría y Financiación"),
       div(class = "definition-card",
         p(strong("Autores:"), " Miguel Ángel Luque-Fernández, Paloma Massó Guijarro, Gustavo Rivas Gervilla, Mario Rivera Izquierdo, Miguel Ángel Montero Alonso y Juan Manuel Melchor Rodríguez (Doctores de la UGR) — ",
@@ -279,6 +316,26 @@ ui <- page_navbar(
 
 # ── SERVER ──
 server <- function(input, output, session) {
+
+  # Diccionario de nombres para indicadores de series temporales
+  ts_ind_names <- c(
+    "Renta_Mediana_UC" = "Renta Mediana",
+    "brecha_p90p10" = "Brecha P90/P10",
+    "brecha_q1_q5" = "Brecha Q1 vs Q5",
+    "q1_renta" = "Renta media Q1",
+    "q5_renta" = "Renta media Q5",
+    "edad_media" = "Edad Media",
+    "pob" = "Población Total",
+    "menor_18" = "% Menores 18",
+    "mayor_65" = "% Mayores 65",
+    "tam_hogar" = "Tamaño Hogar",
+    "hogares_uni" = "% Hogares Unip.",
+    "pob_esp" = "% Población Española",
+    "pob_extranjera" = "% Población Extranjera",
+    "EV_Hombres" = "EV Hombres",
+    "EV_Mujeres" = "EV Mujeres",
+    "EV_Media" = "EV Media"
+  )
 
   # Map loading
   mapa_shp <- reactive({
@@ -337,27 +394,69 @@ server <- function(input, output, session) {
     paste0(round(ev, 1), " años")
   })
 
+  output$brecha <- renderText({
+    df <- datos_filtrados()
+    if (nrow(df) < 10) return("—")
+    q1 <- quantile(df$Renta_Mediana_UC, 0.1, na.rm = TRUE)
+    q9 <- quantile(df$Renta_Mediana_UC, 0.9, na.rm = TRUE)
+    if (is.na(q1) || q1 == 0) return("—")
+    paste0(round(q9 / q1, 1), "x")
+  })
+
   # ── Series Temporales: datos agregados por provincia ──
   ts_data <- reactive({
     req(input$ts_prov)
-    vars <- c("Renta_Mediana_UC", "edad_media", "pob", "menor_18", "mayor_65",
-              "tam_hogar", "hogares_uni", "pob_esp", "pob_extranjera",
-              "Renta_Quintil", "EV_Hombres", "EV_Mujeres", "EV_Media")
-    if (input$ts_prov == "Toda Andalucía") {
-      datos %>%
-        group_by(año) %>%
-        summarise(across(all_of(vars), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
-    } else {
-      datos %>%
-        filter(Provincia == input$ts_prov) %>%
-        group_by(año) %>%
-        summarise(across(all_of(vars), ~ mean(.x, na.rm = TRUE)), .groups = "drop")
-    }
+
+    df <- if (input$ts_prov == "Toda Andalucía") datos else datos %>% filter(Provincia == input$ts_prov)
+    años_unicos <- sort(unique(df$año))
+
+    result_list <- lapply(años_unicos, function(ann) {
+      sub <- df %>% filter(año == ann)
+
+      # Medias de indicadores
+      medias <- c(
+        Renta_Mediana_UC = mean(sub$Renta_Mediana_UC, na.rm = TRUE),
+        edad_media = mean(sub$edad_media, na.rm = TRUE),
+        menor_18 = mean(sub$menor_18, na.rm = TRUE),
+        mayor_65 = mean(sub$mayor_65, na.rm = TRUE),
+        tam_hogar = mean(sub$tam_hogar, na.rm = TRUE),
+        hogares_uni = mean(sub$hogares_uni, na.rm = TRUE),
+        pob_esp = mean(sub$pob_esp, na.rm = TRUE),
+        pob_extranjera = mean(sub$pob_extranjera, na.rm = TRUE),
+        EV_Hombres = mean(sub$EV_Hombres, na.rm = TRUE),
+        EV_Mujeres = mean(sub$EV_Mujeres, na.rm = TRUE),
+        EV_Media = mean(sub$EV_Media, na.rm = TRUE)
+      )
+
+      # Brecha P90/P10
+      q1p <- quantile(sub$Renta_Mediana_UC, 0.1, na.rm = TRUE)
+      q9p <- quantile(sub$Renta_Mediana_UC, 0.9, na.rm = TRUE)
+      brecha_p90 <- if (is.na(q1p) || q1p == 0) NA_real_ else round(q9p / q1p, 2)
+
+      # Quintiles Q1 y Q5
+      q_renta <- ntile(sub$Renta_Mediana_UC, 5)
+      q1_renta_val <- mean(sub$Renta_Mediana_UC[q_renta == 1], na.rm = TRUE)
+      q5_renta_val <- mean(sub$Renta_Mediana_UC[q_renta == 5], na.rm = TRUE)
+
+      data.frame(
+        año = ann,
+        t(medias),
+        brecha_p90p10 = brecha_p90,
+        q1_renta = q1_renta_val,
+        q5_renta = q5_renta_val,
+        brecha_q1_q5 = round(q5_renta_val / q1_renta_val, 2),
+        stringsAsFactors = FALSE,
+        check.names = FALSE
+      )
+    })
+
+    do.call(rbind, result_list)
   })
 
   # ── Series Temporales: título ──
   output$ts_title <- renderText({
-    ind_name <- names(indicadores_completos)[indicadores_completos == input$ts_ind]
+    ind_name <- ts_ind_names[input$ts_ind]
+    if (is.na(ind_name)) ind_name <- input$ts_ind
     paste0(input$ts_prov, " — ", ind_name)
   })
 
@@ -366,7 +465,8 @@ server <- function(input, output, session) {
     req(ts_data(), input$ts_ind)
     df <- ts_data()
     val <- df[[input$ts_ind]]
-    ind_name <- names(indicadores_completos)[indicadores_completos == input$ts_ind]
+    ind_name <- ts_ind_names[input$ts_ind]
+    if (is.na(ind_name)) ind_name <- input$ts_ind
 
     if (all(is.na(val))) {
       return(plot_ly() %>% layout(title = "Sin datos disponibles"))
@@ -377,6 +477,14 @@ server <- function(input, output, session) {
       if (is.na(v)) return(paste0(df$año[i], ": Sin datos"))
       paste0(df$año[i], ": ", format_value(v, input$ts_ind))
     })
+
+    # Formato del eje Y según el indicador
+    y_tickformat <- switch(input$ts_ind,
+      "Renta_Mediana_UC" = ".,0f",
+      "q1_renta" = ".,0f",
+      "q5_renta" = ".,0f",
+      ".1f"
+    )
 
     plot_ly(df,
       x = ~año, y = ~val,
@@ -390,7 +498,7 @@ server <- function(input, output, session) {
     ) %>%
       layout(
         xaxis = list(title = "Año", dtick = 1, gridcolor = "#e8e8e8"),
-        yaxis = list(title = ind_name, gridcolor = "#e8e8e8"),
+        yaxis = list(title = ind_name, gridcolor = "#e8e8e8", tickformat = y_tickformat),
         plot_bgcolor = "rgba(0,0,0,0)",
         paper_bgcolor = "rgba(0,0,0,0)",
         margin = list(l = 60, r = 20, t = 10, b = 50),
@@ -428,15 +536,22 @@ server <- function(input, output, session) {
     df <- renta_provincia
     prov_sel <- input$prov_rel
 
-    # Regresión lineal
-    lm_fit <- lm(EV_Media ~ Renta_Media, data = df)
-    r2 <- summary(lm_fit)$r.squared
-    coefs <- coef(lm_fit)
+    # Regresión: todos (10 provincias)
+    lm_all <- lm(EV_Media ~ Renta_Media, data = df)
+    r2_all <- summary(lm_all)$r.squared
+    coefs_all <- coef(lm_all)
 
-    # Línea de regresión
-    x_range <- seq(min(df$Renta_Media, na.rm = TRUE),
-                   max(df$Renta_Media, na.rm = TRUE), length.out = 100)
-    y_pred <- coefs[1] + coefs[2] * x_range
+    # Regresión: solo Andalucía (8 provincias, sin Ceuta ni Melilla)
+    df_and <- renta_provincia_and
+    lm_and <- lm(EV_Media ~ Renta_Media, data = df_and)
+    r2_and <- summary(lm_and)$r.squared
+    coefs_and <- coef(lm_and)
+
+    # Líneas de regresión
+    x_all <- seq(min(df$Renta_Media, na.rm = TRUE),
+                 max(df$Renta_Media, na.rm = TRUE), length.out = 100)
+    y_all <- coefs_all[1] + coefs_all[2] * x_all
+    y_and <- coefs_and[1] + coefs_and[2] * x_all
 
     # Colores: resaltar provincia seleccionada
     df$color <- ifelse(df$Provincia == prov_sel, "#e74c3c", "#1a5276")
@@ -445,11 +560,18 @@ server <- function(input, output, session) {
 
     p <- plot_ly() %>%
       add_trace(
-        x = ~x_range, y = ~y_pred,
+        x = ~x_all, y = ~y_all,
         type = "scatter", mode = "lines",
-        line = list(color = "rgba(231, 76, 60, 0.5)", width = 2, dash = "dash"),
-        name = paste0("Tendencia lineal (R² = ", round(r2, 3), ")"),
-        hovertemplate = paste0("Recta de regresión<extra></extra>")
+        line = list(color = "rgba(231, 76, 60, 0.4)", width = 2, dash = "dash"),
+        name = paste0("10 prov. (R² = ", round(r2_all, 3), ")"),
+        hovertemplate = "10 provincias<extra></extra>"
+      ) %>%
+      add_trace(
+        x = ~x_all, y = ~y_and,
+        type = "scatter", mode = "lines",
+        line = list(color = "rgba(26, 82, 118, 0.6)", width = 2, dash = "solid"),
+        name = paste0("8 prov. Andalucía (R² = ", round(r2_and, 3), ")"),
+        hovertemplate = "8 provincias (sin Ceuta/Melilla)<extra></extra>"
       ) %>%
       add_trace(
         data = df,
@@ -474,9 +596,11 @@ server <- function(input, output, session) {
       layout(
         xaxis = list(title = "Renta mediana (€)", gridcolor = "#e8e8e8"),
         yaxis = list(title = "Esperanza de vida (años)", gridcolor = "#e8e8e8"),
+        legend = list(orientation = "h", y = -0.3, x = 0.05,
+                      font = list(size = 10)),
         plot_bgcolor = "rgba(0,0,0,0)",
         paper_bgcolor = "rgba(0,0,0,0)",
-        margin = list(l = 50, r = 20, t = 10, b = 50),
+        margin = list(l = 50, r = 20, t = 10, b = 70),
         hovermode = "closest"
       )
     p
@@ -516,19 +640,29 @@ server <- function(input, output, session) {
 
   # ── Coeficiente de correlación ──
   output$correlacion_text <- renderText({
-    df <- renta_provincia
-    r <- cor(df$Renta_Media, df$EV_Media, use = "complete.obs")
-    r2 <- r^2
+    r_all  <- round(corr_all$estimate, 4)
+    p_all  <- round(corr_all$p.value, 4)
+    r_and  <- round(corr_and$estimate, 4)
+    p_and  <- round(corr_and$p.value, 4)
     paste0(
-      "r = ", round(r, 4), "\n",
-      "R² = ", round(r2, 4), " (", round(r2 * 100, 1), "% de la varianza explicada)\n\n",
-      "Interpretación: existe una correlación ",
-      ifelse(abs(r) > 0.8, "muy fuerte",
-             ifelse(abs(r) > 0.6, "fuerte",
-                    ifelse(abs(r) > 0.4, "moderada",
-                           ifelse(abs(r) > 0.2, "débil", "muy débil")))),
-      " y ", ifelse(r > 0, "positiva", "negativa"),
-      " entre la renta mediana y la esperanza de vida a nivel provincial."
+      "10 provincias (incl. Ceuta y Melilla):\n",
+      "  r = ", r_all, "  R² = ", round(r_all^2, 4),
+      "  P = ", p_all, "\n",
+      "  → correlación ",
+      ifelse(abs(r_all) > 0.8, "muy fuerte",
+             ifelse(abs(r_all) > 0.6, "fuerte",
+                    ifelse(abs(r_all) > 0.4, "moderada",
+                           ifelse(abs(r_all) > 0.2, "débil", "muy débil")))),
+      "\n\n",
+      "8 provincias andaluzas (sin Ceuta ni Melilla):\n",
+      "  r = ", r_and, "  R² = ", round(r_and^2, 4),
+      "  P = ", p_and, "\n",
+      "  → correlación ",
+      ifelse(abs(r_and) > 0.8, "muy fuerte",
+             ifelse(abs(r_and) > 0.6, "fuerte",
+                    ifelse(abs(r_and) > 0.4, "moderada",
+                           ifelse(abs(r_and) > 0.2, "débil", "muy débil")))),
+      "\n\nCeuta y Melilla son outliers de renta (economía fronteriza)\nque atenúan la asociación renta–EV."
     )
   })
 
@@ -594,6 +728,12 @@ server <- function(input, output, session) {
   output$causas_ev_bandas <- renderPlotly({
     df <- if (input$causa_sexo == "Hombres") tabla_vida_hombres else tabla_vida_mujeres
 
+    # Forzar orden correcto de bandas de edad (evitar orden alfabético)
+    orden_bandas <- c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
+                      "35-39", "40-44", "45-49", "50-54", "55-59", "60-64",
+                      "65-69", "70-74", "75-79", "80-84", "85-89", "90+")
+    df$banda <- factor(df$banda, levels = orden_bandas, ordered = TRUE)
+
     # Causa con mayor ganancia para mostrar la línea "sin causa"
     causa_top <- ganancia_causas %>%
       filter(sexo == input$causa_sexo) %>%
@@ -626,7 +766,8 @@ server <- function(input, output, session) {
         )
       ) %>%
       layout(
-        xaxis = list(title = "Banda de edad", tickangle = -45, gridcolor = "#e8e8e8"),
+        xaxis = list(title = "Banda de edad", tickangle = -45, gridcolor = "#e8e8e8",
+                     categoryorder = "array", categoryarray = orden_bandas),
         yaxis = list(title = "Esperanza de vida (años)", gridcolor = "#e8e8e8"),
         legend = list(orientation = "h", y = -0.3, x = 0.1),
         plot_bgcolor = "rgba(0,0,0,0)",

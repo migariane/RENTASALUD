@@ -46,8 +46,8 @@ FECHA_CENSO <- 2011 + 305/366
 # Bandas de edad para tablas de vida (5 años, última abierta en 90+)
 CORTES_EDAD <- c(seq(0, 90, by = 5), 120)
 
-# Provincias andaluzas (códigos INE)
-codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41")
+# Provincias andaluzas (códigos INE) + Ceuta y Melilla
+codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41", "51", "52")
 
 # Etiquetas de las bandas de edad
 etiquetas_banda <- c(paste(seq(0, 85, by = 5), seq(4, 89, by = 5), sep = "-"), "90+")
@@ -325,7 +325,8 @@ cat("", strrep("=", 55), "\n")
 
 nombres_provincia <- c(
   "04" = "Almeria", "11" = "Cadiz", "14" = "Cordoba", "18" = "Granada",
-  "21" = "Huelva",  "23" = "Jaen",  "29" = "Malaga",  "41" = "Sevilla"
+  "21" = "Huelva",  "23" = "Jaen",  "29" = "Malaga",  "41" = "Sevilla",
+  "51" = "Ceuta",   "52" = "Melilla"
 )
 
 construir_tabla_vida_provincia <- function(codigo_provincia, sexo_codigo) {
