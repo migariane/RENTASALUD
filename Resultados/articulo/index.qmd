@@ -25,21 +25,27 @@ authors:
         city: Granada
         country: Spain
     email: mariorivera@ugr.es
-  - name: Miguel Ángel Montero Alonso
+  - name: Miguel Ángel Montero-Alonso
     affiliations:
-      - name: Department of Statistics and Operations Research, University of Granada
+      - name: Department of Statistics and Operations Research, Faculty of Medicine, University of Granada
+        city: Granada
+        country: Spain
+      - name: Instituto de Investigación Biosanitaria ibs.GRANADA
         city: Granada
         country: Spain
     email: mmontero@ugr.es
   - name: Juan Manuel Melchor Rodríguez
     affiliations:
-      - name: Department of Statistics and Operations Research, University of Granada
+      - name: Department of Statistics and Operations Research, Faculty of Medicine, University of Granada
+        city: Granada
+        country: Spain
+      - name: Instituto de Investigación Biosanitaria ibs.GRANADA
         city: Granada
         country: Spain
     email: jmelchor@ugr.es
   - name: Miguel Ángel Luque-Fernández
     affiliations:
-      - name: Department of Statistics and Operations Research, University of Granada
+      - name: Department of Statistics and Operations Research, Faculty of Medicine, University of Granada
         city: Granada
         country: Spain
     email: mluquefe@ugr.es
