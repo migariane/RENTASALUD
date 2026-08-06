@@ -164,11 +164,11 @@
 
 \title{RENTASALUD: a web-based interactive atlas of social inequalities
 and life expectancy in Andalusia (southern Spain)}
-\author{Gustavo Rivas Gervilla \and Paloma Massó Guijarro \and Maja
-Nikšić \and Mario Rivera Izquierdo \and Miguel Ángel
-Montero-Alonso \and Juan Manuel Melchor Rodríguez \and Miguel Ángel
-Luque-Fernández}
-\date{2026-08-02}
+\author{Gustavo Rivas Gervilla \and Paloma Massó Guijarro \and Maja
+Nikšić \and Mario Rivera Izquierdo \and Miguel Ángel
+Montero-Alonso \and Juan Manuel Melchor Rodríguez \and Miguel Ángel
+Luque-Fernández}
+\date{2026-08-06}
 \begin{document}
 \maketitle
 \begin{abstract}
@@ -180,13 +180,13 @@ section-years, 2015--2022) with BDLPA cohort life tables
 Andalusia, Ceuta, and Melilla. \textbf{Results} Life expectancy was 79.5
 (men) and 84.4 years (women). Tumours yielded the largest potential gain
 for men (3.93 years) and heart disease for women (2.89 years). The
-provincial income--EV correlation was weak (r=0.28, P=0.43), rising to
-r=0.52 with Ceuta and Melilla excluded. Provincial EV ranged from 79.4
-(Almería) to 82.7 years (Córdoba). \textbf{Conclusion} Provincial
+provincial income--LE correlation was weak (r=0.28, P=0.43), rising to
+r=0.52 with Ceuta and Melilla excluded. Provincial LE ranged from 79.4
+(Almería) to 82.7 years (Córdoba). \textbf{Conclusion} Provincial
 aggregation attenuates the income--life expectancy gradient;
 neighbourhood-level tools like RENTASALUD are needed to detect
 inequalities. \textbf{Keywords:} health inequalities, life expectancy,
-spatial epidemiology, interactive atlas, Andalusia * GRG and PMG
+spatial epidemiology, interactive atlas, Andalusia ~GRG and PMG
 contributed equally as co-first authors.
 \end{abstract}
 
@@ -216,11 +216,11 @@ topic}\label{what-is-already-known-on-this-topic}
   RENTASALUD is an open source interactive atlas of census-section
   income and life expectancy for Andalusia, Ceuta, and Melilla.
 \item
-  At province level the income--EV correlation is weak (r=0.28) and
+  At province level the income--LE correlation is weak (r=0.28) and
   doubles when income-outlier cities are excluded (r=0.52).
 \item
   Cancer and cardiovascular disease account for 7.1 years of potential
-  EV gain in men and 5.7 in women.
+  LE gain in men and 5.7 in women.
 \item
   A built-in AI assistant lets anyone query the data in plain language.
 \end{itemize}
@@ -242,14 +242,14 @@ life tables from the Longitudinal Database of the Andalusian Population
 (BDLPA, \textasciitilde637,000 individuals followed from the 2011 census
 through 2023). The analysis covers the eight Andalusian provinces plus
 the autonomous cities of Ceuta and Melilla. We estimated life expectancy
-by province, sex, and cause of death, examined the income--longevity
-association, and deployed everything as an interactive Shiny application
-with an AI-powered natural-language interface.
+(LE) by province, sex, and cause of death, examined the
+income--longevity association, and deployed everything as an interactive
+Shiny application with an AI-powered natural-language interface.
 
 \section{Methods}\label{methods}
 
 Income and demographic data come from the INE \emph{Atlas de
-Distribución de Renta de los Hogares} {[}@ine\_adrh\_metodologia{]},
+Distribución de Renta de los Hogares} {[}@ine\_adrh\_metodologia{]},
 providing 48,262 census-section observations (2015--2022) across ten
 territories. Mortality data come from the BDLPA
 {[}@ieca\_bdlpa\_metodologia{]}, a 10\% random sample of the 2011
@@ -275,10 +275,10 @@ Granada Ethics Committee (SOCESVIDA, SICEIA-2025-000814).
 \section{Results}\label{results}
 
 Life expectancy at birth was 79.5 years for men and 84.4 for women, a
-gap of nearly 5 years. Provincial EV ranged from 77.8 years (Almería,
-men) to 80.1 (Córdoba and Cádiz, men) and from 80.9 (Almería, women) to
-85.3 (Córdoba, women). The mean provincial spread was 3.3 years (79.4 in
-Almería to 82.7 in Córdoba).
+gap of nearly 5 years. Provincial LE ranged from 77.8 years (Almería,
+men) to 80.1 (Córdoba and Cádiz, men) and from 80.9 (Almería, women) to
+85.3 (Córdoba, women). The mean provincial spread was 3.3 years (79.4 in
+Almería to 82.7 in Córdoba).
 
 Eliminating malignant tumours would add 3.93 years to male life
 expectancy at birth and 2.83 to female (Table 1). For women, heart and
@@ -314,7 +314,7 @@ Other causes & 1.13 & 1.19 \\
 
 Province-level income and life expectancy were weakly correlated
 (r=0.28, 95\% CI −0.42 to 0.77, P=0.43; Spearman ρ=0.24, P=0.51). Ceuta
-(€16,899, EV 82.2) and Melilla (€15,443, EV 82.4) are income outliers:
+(€16,899, LE 82.2) and Melilla (€15,443, LE 82.4) are income outliers:
 their median incomes are well above the Andalusian range
 (€12,699--€14,338), but their life expectancy sits in the middle,
 weakening the aggregate association. Excluding them raises the
@@ -336,7 +336,7 @@ all ten territories (R²=0.08, P=0.43).}
 \end{figure}%
 
 The 3.3-year provincial gradient runs in the expected direction, but the
-statistical signal is imprecise with ten data points. Redondo-Sánchez et
+statistical signal is imprecise with ten data points. Redondo-Sánchez et
 al.~found a much steeper gradient at census-tract level (3.8 years for
 men, 3.2 for women) {[}@redondo2022{]}, suggesting that within-province
 disparities likely exceed what we can detect here. The results are
@@ -347,7 +347,7 @@ with all analysis code at
 
 \section{Discussion}\label{discussion}
 
-The province-level income--EV correlation is weak mainly for two
+The province-level income--LE correlation is weak mainly for two
 reasons: aggregating thousands of census tracts into ten units shrinks
 variance, and Ceuta and Melilla act as leverage points with high incomes
 but mid-range life expectancy. Removing them triples the explained
@@ -357,15 +357,15 @@ its statistical expression is noisy at n=10.
 This study links individual follow-up on nearly 637,000 people over 12
 years to fine-grained socioeconomic data. The main limitation is
 geographic: BDLPA person identifiers contain no sub-provincial code,
-restricting EV estimation to the province level. Future linkage to the
-municipal register (Padrón Continuo) would enable small-area Bayesian
+restricting LE estimation to the province level. Future linkage to the
+municipal register (Padrón Continuo) would enable small-area Bayesian
 estimation. Other limitations include constant-mortality assumptions,
 small cell counts at extreme ages, and the standard caveat that
 cause-deleted life tables treat causes as independent.
 
 \section{Acknowledgements}\label{acknowledgements}
 
-Supported by the Plan Propio de Investigación y Transferencia,
+Supported by the Plan Propio de Investigacion y Transferencia,
 University of Granada (2025, Programa 21). BDLPA data provided by the
 IECA.
 
@@ -382,7 +382,7 @@ BDLPA microdata available from IECA on request.
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
-  Redondo-Sánchez D, Sánchez MJ, Fernández-Navarro P, Rachet B,
+  Redondo-Sánchez D, Sánchez MJ, Fernández-Navarro P, Rachet B,
   Luque-Fernandez MA. Association of socioeconomic deprivation with life
   expectancy and all-cause mortality in Spain, 2011-2013. \emph{Sci
   Rep}. 2022;12(1):15554. doi:10.1038/s41598-022-19859-1.
@@ -390,7 +390,7 @@ BDLPA microdata available from IECA on request.
   Marmot M. \emph{Fair Society, Healthy Lives: The Marmot Review}.
   London: UCL; 2010.
 \item
-  Mackenbach JP, Kulhánová I, Menvielle G, et al.~Trends in inequalities
+  Mackenbach JP, Kulhánová I, Menvielle G, et al.~Trends in inequalities
   in premature mortality: a study of 3.2 million deaths in 13 European
   countries. \emph{J Epidemiol Community Health}. 2015;69(3):207-17.
   doi:10.1136/jech-2014-204319.
@@ -399,7 +399,7 @@ BDLPA microdata available from IECA on request.
   inequalities in 27 European countries. \emph{Proc Natl Acad Sci}.
   2018;115(25):6440-5. doi:10.1073/pnas.1800028115.
 \item
-  Regidor E, Kunst AE, Rodríguez-Artalejo F, Mackenbach JP. Small
+  Regidor E, Kunst AE, Rodríguez-Artalejo F, Mackenbach JP. Small
   socio-economic differences in mortality in Spanish older people.
   \emph{Eur J Public Health}. 2012;22(1):80-5.
   doi:10.1093/eurpub/ckr051.
@@ -411,17 +411,17 @@ BDLPA microdata available from IECA on request.
   Chiang CL. \emph{Introduction to Stochastic Processes in
   Biostatistics}. New York: Wiley; 1968.
 \item
-  Beltrán-Sánchez H, Preston SH, Canudas-Romo V. An integrated approach
+  Beltrán-Sánchez H, Preston SH, Canudas-Romo V. An integrated approach
   to cause-of-death analysis: cause-deleted life tables and
   decompositions of life expectancy. \emph{Demogr Res}.
   2008;19:1565-602. doi:10.4054/DemRes.2008.19.35.
 \item
-  Instituto Nacional de Estadística. Atlas de Distribución de Renta de
-  los Hogares: Metodología. 2024.
+  Instituto Nacional de Estadística. Atlas de Distribución de Renta de
+  los Hogares: Metodología. 2024.
   https://www.ine.es/dyngs/INEbase/es/operacion.htm?c=Estadistica\_C\&cid=1254736177088\&menu=metodologia.
 \item
-  Instituto de Estadística y Cartografía de Andalucía. Estadísticas
-  Longitudinales de Supervivencia y Longevidad en Andalucía: Ficheros de
+  Instituto de Estadística y Cartografía de Andalucía. Estadísticas
+  Longitudinales de Supervivencia y Longevidad en Andalucía: Ficheros de
   Microdatos, Cohorte 2011. 2024.
   https://www.juntadeandalucia.es/institutodeestadisticaycartografia/bdlpa/.
 \end{enumerate}
