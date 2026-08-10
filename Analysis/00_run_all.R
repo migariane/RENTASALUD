@@ -47,11 +47,9 @@
 ##       FNAC (birth date ×10, always 5 digits) by line length and derive
 ##       other columns relative to it.
 ##
-##    5. 10 territories (8 provinces + Ceuta + Melilla):
-##       Ceuta (51) and Melilla (52) are autonomous cities with distinct
-##       economic structures (cross-border trade, special tax regimes).
-##       Including them adds ~105k individuals and enables sensitivity
-##       analysis showing they are income outliers.
+##    5. 8 Andalusian provinces only:
+##       BDLPA scope is exclusively Andalusia. Ceuta and Melilla are not
+##       included in this data source.
 ##
 ##  PREREQUISITES:
 ##    - R packages: dplyr, sf
@@ -105,10 +103,9 @@ FECHA_CENSO <- 2011 + 305/366
 # open interval avoids unstable estimates from small death counts.
 CORTES_EDAD <- c(seq(0, 90, by = 5), 120)
 
-# 10 territories: 8 Andalusian provinces + Ceuta (51) + Melilla (52)
-# INE 2-digit province codes. Ceuta and Melilla are autonomous cities
-# included for completeness and sensitivity analysis.
-codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41", "51", "52")
+# 8 Andalusian provinces
+# INE 2-digit province codes.
+codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41")
 
 # Human-readable age band labels
 etiquetas_banda <- c(paste(seq(0, 85, by = 5), seq(4, 89, by = 5), sep = "-"), "90+")
@@ -194,7 +191,7 @@ cat("  Shapefiles optimizados.\n")
 ##        where R = proportion of deaths NOT from target cause
 ##    B7. Observed EV by sex
 ##    B8. EV gain if each cause eliminated (10 causes × 2 sexes = 20 estimates)
-##    B9. EV by province × sex (10 territories × 2 sexes = 20 life tables)
+##    B9. EV by province × sex (8 provinces × 2 sexes = 16 life tables)
 
 cat("\n", strrep("-", 50), "\n")
 cat("  PARTE B: Esperanza de vida (BDLPA)\n")
@@ -226,7 +223,7 @@ ID   <- substr(lineas, 1, 6)
 # PROVINCIA extraction: the province code is NOT at a fixed offset from
 # FNAC because another variable-length field sits between them. We scan
 # a window before FNAC looking for valid 2-digit INE codes.
-codigos_provincia_validos <- codigos_andalucia
+codigos_provincia_validos <- codigos_andalucia  # 8 Andalusian provinces only — no Ceuta/Melilla in BDLPA
 localizar_provincia <- function(linea, p0) {
   for (inicio in (max(0, p0 - 20)):(p0 - 10)) {
     candidato <- substr(linea, inicio + 1, inicio + 2)
@@ -443,7 +440,7 @@ construir_tabla_vida <- function(sexo_codigo, causas_a_eliminar = NULL) {
 }
 
 ## ---------------------------------------------------------------------------
-## B7. Observed life expectancy by sex (all 10 territories combined)
+## B7. Observed life expectancy by sex (all 8 provinces combined)
 ## ---------------------------------------------------------------------------
 ##
 ##  SEXO = 1 → male, SEXO = 6 → female (INE coding convention)
@@ -506,7 +503,7 @@ print(resumen)
 ## B9. Life expectancy by province and sex
 ## ---------------------------------------------------------------------------
 ##
-##  Builds 20 independent life tables (10 territories × 2 sexes).
+##  Builds 16 independent life tables (8 provinces × 2 sexes).
 ##  Each table uses only the subset of individuals in that province × sex.
 ##
 ##  WHY NOT SMALL-AREA ESTIMATION:
@@ -527,8 +524,7 @@ cat("", strrep("=", 55), "\n")
 
 nombres_provincia <- c(
   "04" = "Almeria", "11" = "Cadiz", "14" = "Cordoba", "18" = "Granada",
-  "21" = "Huelva",  "23" = "Jaen",  "29" = "Malaga",  "41" = "Sevilla",
-  "51" = "Ceuta",   "52" = "Melilla"
+  "21" = "Huelva",  "23" = "Jaen",  "29" = "Malaga",  "41" = "Sevilla"
 )
 
 construir_tabla_vida_provincia <- function(codigo_provincia, sexo_codigo) {
@@ -587,7 +583,7 @@ names(ev_provincia_ancho) <- c("provincia", "EV_Hombres", "EV_Mujeres")
 ##    1. ganancia_esperanza_vida_por_causa.csv — 20 rows (10 causes × 2 sexes)
 ##    2. tabla_vida_hombres.csv              — 19 rows (age bands)
 ##    3. tabla_vida_mujeres.csv              — 19 rows
-##    4. ev_por_provincia_sexo.csv           — 20 rows (10 territories × 2 sexes, long)
+##    4. ev_por_provincia_sexo.csv           — 16 rows (8 provinces × 2 sexes, long)
 ##    5. ev_por_provincia_ancho.csv          — 10 rows (one per territory, wide)
 ##    6. grafico_ganancia_por_causa.png      — horizontal barplot
 

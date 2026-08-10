@@ -18,9 +18,7 @@ Datos/SHP/
 # Compiled outputs
 Resultados/*.csv
 Resultados/*.png
-Resultados/articulo/_manuscript/
-Resultados/articulo/_freeze/
-Resultados/articulo/.quarto/
+Resultados/articulo/
 Resultados/Figuras/
 
 # R artifacts

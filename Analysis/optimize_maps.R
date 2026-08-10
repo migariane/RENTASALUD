@@ -14,7 +14,7 @@
 ##
 ##  WHAT IT DOES:
 ##    1. Reads each year's shapefile (SHP/seccionado_YYYY/*.shp)
-##    2. Filters to Andalusian sections + Ceuta + Melilla (CPRO filter)
+##    2. Filters to Andalusian sections (CPRO filter)
 ##    3. Reprojects from ETRS89/UTM (EPSG:25830) to WGS84 (EPSG:4326)
 ##    4. Saves as .rds (R's native serialization format)
 ##
@@ -52,8 +52,8 @@
 library(sf)
 library(dplyr)
 
-# 10 territories: 8 Andalusian provinces + Ceuta (51) + Melilla (52)
-codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41", "51", "52")
+# 8 Andalusian provinces
+codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41")
 
 dir.create("SHP_opt", showWarnings = FALSE)
 

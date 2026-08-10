@@ -21,10 +21,6 @@
 ##    - Ollama local-first: privacy guarantee (no data leaves the machine).
 ##      Only falls back to cloud APIs if Ollama is unavailable AND API
 ##      keys are set.
-##    - Sensitivity analysis (with/without Ceuta/Melilla): Ceuta and
-##      Melilla are autonomous cities with distinct economic structures
-##      (border trade, special tax regimes). Pre-computing both
-##      correlations avoids recomputation on every user interaction.
 ## =============================================================================
 
 library(shiny)
@@ -62,6 +58,9 @@ ai_packages_ok <- tryCatch({
 ##    pob_esp          — % Spanish nationals
 
 load("datos_rentapop_long.RData")
+
+# Filter to the 8 Andalusian provinces (BDLPA scope).
+datos <- datos %>% filter(Provincia %in% c("Almeria","Cadiz","Cordoba","Granada","Huelva","Jaen","Malaga","Sevilla"))
 
 # Census section IDs are 10-digit codes (CPRO+CMUN+CDIS+CSEC).
 # Some IDs may have lost leading zeros during CSV export; we pad them.
@@ -114,16 +113,8 @@ renta_provincia <- datos %>%
             EV_Media = mean(EV_Media, na.rm = TRUE),
             .groups = "drop")
 
-# ── Sensitivity: Andalusia only (8 provinces, excluding Ceuta/Melilla) ──
-# Ceuta and Melilla are autonomous cities with distinct economic structures
-# (cross-border trade, large public sector, special tax regimes). They act
-# as income outliers that weaken the aggregate income-EV correlation.
-# We pre-compute both versions for the app's sensitivity toggle.
-andalucia_solo <- c("Almeria","Cadiz","Cordoba","Granada","Huelva","Jaen","Malaga","Sevilla")
-renta_provincia_and <- renta_provincia %>% filter(Provincia %in% andalucia_solo)
-
+# ── Province-level correlation (8 Andalusian provinces) ──
 corr_all <- cor.test(renta_provincia$Renta_Media, renta_provincia$EV_Media)
-corr_and <- cor.test(renta_provincia_and$Renta_Media, renta_provincia_and$EV_Media)
 
 # ── Cause-elimination gains (pipeline output) ──
 ruta_ganancia <- if (file.exists("../Resultados/ganancia_esperanza_vida_por_causa.csv")) {
@@ -196,7 +187,7 @@ indicadores_completos <- c(
 )
 
 # INE province codes for shapefile filtering
-codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41", "51", "52")
+codigos_andalucia <- c("04", "11", "14", "18", "21", "23", "29", "41")
 
 # ── AI backend detection ──
 # Ollama runs locally (privacy-preserving, no data leaves the machine).

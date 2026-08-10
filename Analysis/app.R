@@ -536,22 +536,14 @@ server <- function(input, output, session) {
     df <- renta_provincia
     prov_sel <- input$prov_rel
 
-    # Regresión: todos (10 provincias)
+    # Regresión: 8 provincias andaluzas
     lm_all <- lm(EV_Media ~ Renta_Media, data = df)
     r2_all <- summary(lm_all)$r.squared
     coefs_all <- coef(lm_all)
 
-    # Regresión: solo Andalucía (8 provincias, sin Ceuta ni Melilla)
-    df_and <- renta_provincia_and
-    lm_and <- lm(EV_Media ~ Renta_Media, data = df_and)
-    r2_and <- summary(lm_and)$r.squared
-    coefs_and <- coef(lm_and)
-
-    # Líneas de regresión
     x_all <- seq(min(df$Renta_Media, na.rm = TRUE),
                  max(df$Renta_Media, na.rm = TRUE), length.out = 100)
     y_all <- coefs_all[1] + coefs_all[2] * x_all
-    y_and <- coefs_and[1] + coefs_and[2] * x_all
 
     # Colores: resaltar provincia seleccionada
     df$color <- ifelse(df$Provincia == prov_sel, "#e74c3c", "#1a5276")
@@ -562,16 +554,9 @@ server <- function(input, output, session) {
       add_trace(
         x = ~x_all, y = ~y_all,
         type = "scatter", mode = "lines",
-        line = list(color = "rgba(231, 76, 60, 0.4)", width = 2, dash = "dash"),
-        name = paste0("10 prov. (R² = ", round(r2_all, 3), ")"),
-        hovertemplate = "10 provincias<extra></extra>"
-      ) %>%
-      add_trace(
-        x = ~x_all, y = ~y_and,
-        type = "scatter", mode = "lines",
         line = list(color = "rgba(26, 82, 118, 0.6)", width = 2, dash = "solid"),
-        name = paste0("8 prov. Andalucía (R² = ", round(r2_and, 3), ")"),
-        hovertemplate = "8 provincias (sin Ceuta/Melilla)<extra></extra>"
+        name = paste0("8 prov. Andalucía (R² = ", round(r2_all, 3), ")"),
+        hovertemplate = "8 provincias andaluzas<extra></extra>"
       ) %>%
       add_trace(
         data = df,
@@ -642,27 +627,15 @@ server <- function(input, output, session) {
   output$correlacion_text <- renderText({
     r_all  <- round(corr_all$estimate, 4)
     p_all  <- round(corr_all$p.value, 4)
-    r_and  <- round(corr_and$estimate, 4)
-    p_and  <- round(corr_and$p.value, 4)
     paste0(
-      "10 provincias (incl. Ceuta y Melilla):\n",
+      "8 provincias andaluzas:\n",
       "  r = ", r_all, "  R² = ", round(r_all^2, 4),
       "  P = ", p_all, "\n",
       "  → correlación ",
       ifelse(abs(r_all) > 0.8, "muy fuerte",
              ifelse(abs(r_all) > 0.6, "fuerte",
                     ifelse(abs(r_all) > 0.4, "moderada",
-                           ifelse(abs(r_all) > 0.2, "débil", "muy débil")))),
-      "\n\n",
-      "8 provincias andaluzas (sin Ceuta ni Melilla):\n",
-      "  r = ", r_and, "  R² = ", round(r_and^2, 4),
-      "  P = ", p_and, "\n",
-      "  → correlación ",
-      ifelse(abs(r_and) > 0.8, "muy fuerte",
-             ifelse(abs(r_and) > 0.6, "fuerte",
-                    ifelse(abs(r_and) > 0.4, "moderada",
-                           ifelse(abs(r_and) > 0.2, "débil", "muy débil")))),
-      "\n\nCeuta y Melilla son outliers de renta (economía fronteriza)\nque atenúan la asociación renta–EV."
+                           ifelse(abs(r_all) > 0.2, "débil", "muy débil"))))
     )
   })
 
