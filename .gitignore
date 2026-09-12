@@ -15,10 +15,21 @@ Datos/SHP/
 *.rds
 *.zip
 
-# Compiled outputs
+# Compiled outputs (but NOT the article source files)
 Resultados/*.csv
 Resultados/*.png
-Resultados/articulo/
+Resultados/Article/articulo/index.pdf
+Resultados/Article/articulo/index.tex
+Resultados/Article/articulo/index.docx
+Resultados/Article/articulo/*_revised.docx
+Resultados/Article/articulo/*.log
+Resultados/Article/articulo/cover-letter.docx
+Resultados/Article/articulo/cover-letter_revised.docx
+Resultados/Article/articulo/title-page.docx
+Resultados/Article/articulo/title-page_revised.docx
+Resultados/Article/articulo/abstract_revised.docx
+Resultados/Article/articulo/methods_report.pdf
+Resultados/Article/articulo/cover-letter_files/
 Resultados/Figuras/
 
 # R artifacts
@@ -29,4 +40,6 @@ Resultados/Figuras/
 .vscode/
 
 # Quarto
-Resultados/articulo/_extensions/
+Resultados/Article/articulo/_extensions/
+Resultados/Article/articulo/_quarto/
+Resultados/Article/articulo/_freeze/

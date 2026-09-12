@@ -44,7 +44,7 @@ ai_packages_ok <- tryCatch({
 ## =========================================================================
 ##
 ##  Source: Atlas de Distribución de Renta de los Hogares (ADRH), INE
-##  Coverage: 10 territories (8 Andalusian provinces + Ceuta + Melilla)
+##  Coverage: 8 Andalusian provinces (Ceuta and Melilla excluded)
 ##  Resolution: Census section (sección censal), ~6,000 sections × 8 years
 ##
 ##  Key variables:
