@@ -5,6 +5,10 @@ Datos/datos_rentapop_long.csv
 Datos/datos_rentapop_long.RData
 Analysis/datos_rentapop_long.RData
 
+# CI test data (auto-generated, not for commit)
+Datos_CI/
+
+
 # Shapefiles (obtain from INE separately)
 Analysis/SHP/
 Analysis/SHP_opt/
@@ -43,3 +47,12 @@ Resultados/Figuras/
 Resultados/Article/articulo/_extensions/
 Resultados/Article/articulo/_quarto/
 Resultados/Article/articulo/_freeze/
+
+# Confidential / internal (never publish to this public repo)
+Resultados/Article/
+Resultados/bmj.csl
+gpai_workflow/
+.claude/
+
+# Municipal analysis generated outputs
+Analysis/EV_municipal/salidas/

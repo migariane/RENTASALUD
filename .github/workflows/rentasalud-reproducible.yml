@@ -39,17 +39,12 @@ jobs:
         run: |
           Rscript -e "install.packages(c('dplyr', 'sf', 'readr', 'tidyr', 'ggplot2', 'scales'), repos='https://cloud.r-project.org/')"
       
-      - name: Create data directory structure
+      - name: Generate test data for CI
         run: |
-          mkdir -p Datos
-          # Note: Raw data files (mp11.txt, smp11cau.txt) are not in repo
-          # They must be obtained from IECA/INE separately
-          echo "Data files must be obtained from IECA/INE separately"
-      
-      - name: Create shapefile directory
-        run: |
-          mkdir -p Analysis/SHP/seccionado_2015 Analysis/SHP/seccionado_2016 Analysis/SHP/seccionado_2017 Analysis/SHP/seccionado_2018 Analysis/SHP/seccionado_2019 Analysis/SHP/seccionado_2020 Analysis/SHP/seccionado_2021 Analysis/SHP/seccionado_2022
-          echo "Shapefiles must be obtained from INE separately"
+          cd Analysis
+          Rscript generate_test_data.R
+        env:
+          RENTASALUD_CI_MODE: "true"
       
       - name: Run analysis pipeline
         run: |

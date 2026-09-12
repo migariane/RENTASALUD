@@ -19,8 +19,8 @@
 ##    │     Why:    RDS loads 10-50× faster than shapefile in Shiny
 ##    │
 ##    ├── PARTE B: Life expectancy by cause, age, sex, and province
-##    │     Reads:  ../Datos/mp11.txt (BDLPA persons, ~637k)
-##    │             ../Datos/smp11cau.txt (BDLPA follow-up + cause)
+##    │     Reads:  ../Datos_CI/mp11.txt (BDLPA persons, ~637k)
+##    │             ../Datos_CI/smp11cau.txt (BDLPA follow-up + cause)
 ##    │     Method: Chiang (1968) cause-deleted life tables
 ##    │     Writes: (see PARTE C below)
 ##    │
@@ -80,14 +80,29 @@ if (dir.exists("/mnt/user-data/uploads")) {
   out_dir       <- "/mnt/user-data/outputs"
 } else {
   # Local development environment
-  ruta_mp11     <- "../Datos/mp11.txt"
-  ruta_smp11cau <- "../Datos/smp11cau.txt"
+  ruta_mp11     <- "../Datos_CI/mp11.txt"
+  ruta_smp11cau <- "../Datos_CI/smp11cau.txt"
   out_dir       <- "../Resultados"
 }
 
-# Fail fast if input data is missing — don't waste time on partial runs
-stopifnot(file.exists(ruta_mp11))
-stopifnot(file.exists(ruta_smp11cau))
+# CI MODE: Detect if running in CI (GitHub Actions)
+ci_mode <- Sys.getenv("RENTASALUD_CI_MODE") == "true"
+
+if (ci_mode) {
+  cat("  [CI MODE] Using synthetic test data\n")
+  # Generate test data files if they don't exist
+  if (!file.exists("../Datos_CI/mp11.txt") || !file.exists("../Datos_CI/smp11cau.txt")) {
+    source("generate_test_data.R")
+  }
+  # Override paths to use generated test data
+  ruta_mp11     <- "../Datos_CI/mp11.txt"
+  ruta_smp11cau <- "../Datos_CI/smp11cau.txt"
+  # Skip real-data stopifnot in CI mode
+} else {
+  # Fail fast if input data is missing — don't waste time on partial runs
+  stopifnot(file.exists(ruta_mp11))
+  stopifnot(file.exists(ruta_smp11cau))
+}
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 # ── Demographic parameters ──
@@ -146,25 +161,33 @@ cat("", strrep("-", 50), "\n")
 
 dir.create("SHP_opt", showWarnings = FALSE)
 
-for (year in 2015:2022) {
-  carpeta <- paste0("SHP/seccionado_", year)
-  if (dir.exists(carpeta)) {
-    archivo <- list.files(carpeta, pattern = "\\.shp$", full.names = TRUE)
-    if (length(archivo) > 0) {
-      cat("  Procesando año", year, "...\n")
-      m <- st_read(archivo[1], quiet = TRUE)
+if (!ci_mode) {
+  dir.create("SHP_opt", showWarnings = FALSE)
 
-      # Filter: only sections in the 10 target territories
-      # CPRO = province code (first 2 digits of the 10-digit CUSEC)
-      m_and <- m %>%
-        filter(CPRO %in% codigos_andalucia) %>%
-        st_transform(4326)
+  for (year in 2015:2022) {
+    carpeta <- paste0("SHP/seccionado_", year)
+    if (dir.exists(carpeta)) {
+      archivo <- list.files(carpeta, pattern = "\\.shp$", full.names = TRUE)
+      if (length(archivo) > 0) {
+        cat("  Procesando año", year, "...\n")
+        m <- st_read(archivo[1], quiet = TRUE)
 
-      saveRDS(m_and, paste0("SHP_opt/seccionado_", year, ".rds"))
+        # Filter: only sections in the 10 target territories
+        # CPRO = province code (first 2 digits of the 10-digit CUSEC)
+        m_and <- m %>%
+          filter(CPRO %in% codigos_andalucia) %>%
+          st_transform(4326)
+
+        saveRDS(m_and, paste0("SHP_opt/seccionado_", year, ".rds"))
+      }
     }
   }
+  cat("  Shapefiles optimizados.\n")
+} else {
+  cat("  [CI MODE] Skipping shapefile optimization\n")
+  dir.create("SHP_opt", showWarnings = FALSE)
 }
-cat("  Shapefiles optimizados.\n")
+
 
 
 ## =============================================================================
