@@ -1,0 +1,371 @@
+/* =============================================================================
+   CUSTOM CSS — Desigualdades Sociales en Andalucía
+   Premium, warm, humanized design system
+   ============================================================================= */
+
+/* --- CSS Custom Properties --- */
+:root {
+  --color-primary-dark: #1a5276;
+  --color-primary: #2980b9;
+  --color-primary-light: #d4e6f1;
+  --color-accent: #e67e22;
+  --color-success: #1e8449;
+  --color-success-light: #d5f5e3;
+  --color-danger: #c0392b;
+  --color-danger-light: #fadbd8;
+  --color-surface: #f4f6f7;
+  --color-card: #ffffff;
+  --color-text: #2c3e50;
+  --color-text-muted: #7f8c8d;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Navbar --- */
+.navbar {
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, #1f6f8b 50%, var(--color-primary) 100%) !important;
+  border-bottom: 3px solid var(--color-accent) !important;
+  box-shadow: var(--shadow-md) !important;
+  padding: 0.5rem 1.5rem !important;
+}
+
+.navbar-brand {
+  font-weight: 800 !important;
+  font-size: 1.25rem !important;
+  letter-spacing: -0.02em !important;
+  color: #ffffff !important;
+}
+
+.navbar .nav-link {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  padding: 0.6rem 1.2rem !important;
+  border-radius: var(--radius-sm) !important;
+  transition: var(--transition) !important;
+  margin: 0 2px !important;
+}
+
+.navbar .nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.navbar .nav-link.active {
+  color: var(--color-primary-dark) !important;
+  background: #ffffff !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  background: var(--color-card) !important;
+  border-right: 1px solid #e8ecef !important;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+.sidebar .form-label {
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: var(--color-primary-dark) !important;
+  margin-bottom: 0.4rem !important;
+}
+
+.sidebar .form-select,
+.sidebar .form-control {
+  border: 1.5px solid #d5dbdb !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.9rem !important;
+  transition: var(--transition) !important;
+  background-color: var(--color-surface) !important;
+}
+
+.sidebar .form-select:focus,
+.sidebar .form-control:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.15) !important;
+  background-color: #ffffff !important;
+}
+
+/* --- Year Slider --- */
+.irs--shiny .irs-bar {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent)) !important;
+  border: none !important;
+}
+
+.irs--shiny .irs-handle {
+  background: var(--color-card) !important;
+  border: 3px solid var(--color-primary) !important;
+  box-shadow: var(--shadow-sm) !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+  cursor: grab !important;
+}
+
+.irs--shiny .irs-handle:active {
+  cursor: grabbing !important;
+  border-color: var(--color-accent) !important;
+  box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.2) !important;
+}
+
+.irs--shiny .irs-single {
+  background: var(--color-primary-dark) !important;
+  border-radius: 20px !important;
+  padding: 2px 10px !important;
+  font-weight: 700 !important;
+}
+
+/* --- Cards --- */
+.card {
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: var(--transition) !important;
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.card-header {
+  background: var(--color-card) !important;
+  border-bottom: 2px solid var(--color-surface) !important;
+  font-weight: 700 !important;
+  padding: 1rem 1.25rem !important;
+}
+
+/* --- Value Boxes --- */
+.bslib-value-box {
+  border: none !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: var(--transition) !important;
+  overflow: hidden;
+}
+
+.bslib-value-box:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.bslib-value-box .value-box-title {
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  font-weight: 700 !important;
+  opacity: 0.85;
+}
+
+.bslib-value-box .value-box-value {
+  font-size: 1.6rem !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.bslib-value-box .value-box-showcase .bi {
+  font-size: 2.2rem !important;
+  opacity: 0.9 !important;
+}
+
+/* --- Narrative Card --- */
+.narrative-card {
+  background: linear-gradient(135deg, #fef9e7 0%, #fdebd0 100%) !important;
+  border-left: 4px solid var(--color-accent) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 1.1rem 1.4rem !important;
+  box-shadow: var(--shadow-sm) !important;
+  margin-bottom: 1rem;
+}
+
+.narrative-card .narrative-icon {
+  font-size: 1.3rem;
+  margin-right: 0.6rem;
+  color: var(--color-accent);
+}
+
+.narrative-card .narrative-title {
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primary-dark);
+  margin-bottom: 0.5rem;
+}
+
+.narrative-card .narrative-text {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--color-text);
+}
+
+/* --- Map --- */
+.leaflet-container {
+  border-radius: 0 0 var(--radius-md) var(--radius-md) !important;
+}
+
+/* --- AI Chat Panel --- */
+.chat-instructions-card {
+  max-width: 650px;
+  margin: 2rem auto;
+  background: linear-gradient(135deg, #eaf2f8 0%, #d4e6f1 100%);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.chat-instructions-card h3 {
+  color: var(--color-primary-dark);
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.chat-instructions-card .setup-step {
+  background: var(--color-card);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1.2rem;
+  margin: 0.6rem 0;
+  text-align: left;
+  font-size: 0.9rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.chat-instructions-card .step-number {
+  background: var(--color-primary);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.chat-instructions-card code {
+  background: #2c3e50;
+  color: #1abc9c;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* --- About / Methodology Page --- */
+.about-section {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.about-section h2 {
+  color: var(--color-primary-dark);
+  font-weight: 800;
+  border-bottom: 3px solid var(--color-accent);
+  padding-bottom: 0.5rem;
+  margin: 1.8rem 0 1rem 0;
+}
+
+.about-section h3 {
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-top: 1.3rem;
+}
+
+.definition-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  padding: 1.2rem 1.5rem;
+  margin: 0.8rem 0;
+  border-left: 4px solid var(--color-primary);
+}
+
+.definition-card strong {
+  color: var(--color-primary-dark);
+}
+
+/* --- Accordion --- */
+.accordion-button {
+  font-weight: 700 !important;
+  font-size: 0.88rem !important;
+  padding: 0.75rem 1rem !important;
+  color: var(--color-primary-dark) !important;
+}
+
+.accordion-button:not(.collapsed) {
+  background: var(--color-primary-light) !important;
+  color: var(--color-primary-dark) !important;
+}
+
+.accordion-body {
+  font-size: 0.88rem !important;
+  line-height: 1.6 !important;
+  color: var(--color-text) !important;
+}
+
+/* --- Animations --- */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bslib-value-box {
+  animation: fadeInUp 0.5s ease-out both;
+}
+
+.bslib-value-box:nth-child(1) { animation-delay: 0.05s; }
+.bslib-value-box:nth-child(2) { animation-delay: 0.12s; }
+.bslib-value-box:nth-child(3) { animation-delay: 0.19s; }
+.bslib-value-box:nth-child(4) { animation-delay: 0.26s; }
+
+.narrative-card {
+  animation: fadeInUp 0.5s ease-out 0.3s both;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .bslib-value-box .value-box-value {
+    font-size: 1.2rem !important;
+  }
+  .narrative-card {
+    padding: 0.9rem 1rem !important;
+  }
+}
+
+/* --- Footer --- */
+.app-footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid #ecf0f1;
+  margin-top: 1.5rem;
+}
+
+.app-footer a {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}

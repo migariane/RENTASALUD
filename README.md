@@ -10,7 +10,7 @@
 
 ## Overview
 
-RENTASALUD is a reproducible R pipeline for estimating life expectancy and analysing income-mortality associations across the eight provinces of Andalusia (southern Spain). The project produces the data backing the [RENTASALUD Interactive Atlas](https://watzile.shinyapps.io/RENTA/).
+RENTASALUD is a reproducible R pipeline for estimating life expectancy and analysing income-mortality associations across the eight provinces of Andalusia (southern Spain). The project produces the data backing the [RENTASALUD Interactive Atlas](https://watzile.shinyapps.io/RENTASALUD/).
 
 ### Key Features
 
@@ -164,7 +164,7 @@ Non-parametric bootstrap (999 resamples by default) with percentile-based 95% CI
 
 ## Interactive Atlas
 
-The [RENTASALUD Interactive Atlas](https://watzile.shinyapps.io/RENTA/) allows exploration of:
+The [RENTASALUD Interactive Atlas](https://watzile.shinyapps.io/RENTASALUD/) allows exploration of:
 
 - Life expectancy by province and sex
 - Income distribution at census-section level

@@ -295,7 +295,7 @@ ui <- page_navbar(
           "RENTASALUD: A Web-Based Interactive Atlas of Social Inequalities and Life Expectancy ",
           "in Andalusia (Southern Spain). University of Granada; 2025. DOI: 10.5281/zenodo.21237758"),
         p(style = "margin-top:10px;",
-          tags$img(src = "https://zenodo.org/badge/DOI/10.5281/zenodo.21237758.svg",
+          tags$img(src = "https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21237758-1682D4?logo=zenodo&logoColor=white",
                    height = "20", style = "vertical-align:middle;"),
           HTML("&nbsp;"),
           tags$a(href = "https://doi.org/10.5281/zenodo.21237758",

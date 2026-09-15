@@ -67,6 +67,18 @@ copiar(file.path(app_src, "global.R"), bundle)
 copiar(file.path(app_src, "datos_rentapop_long.RData"), bundle)
 for (f in csv_names) copiar(file.path(src_data, f), bundle)
 
+## Static assets (www/): the UGR logo and custom.css that app.R references.
+## Without them the logo/styles silently fail to load on shinyapps.io.
+www_src <- file.path(app_src, "www")
+if (dir.exists(www_src) && length(list.files(www_src)) > 0) {
+  dir.create(file.path(bundle, "www"), showWarnings = FALSE)
+  ok <- file.copy(list.files(www_src, full.names = TRUE),
+                  file.path(bundle, "www"), overwrite = TRUE, recursive = TRUE)
+  cat("  bundled www/:", sum(ok), "files\n")
+} else {
+  warning("no Analysis/www/ assets found — logo/custom.css will be missing")
+}
+
 ## Maps are optional: app.R only reads SHP_opt/seccionado_<year>.rds lazily
 ## (readRDS guarded by file.exists), so the app starts without them.
 include_maps <- tolower(Sys.getenv("INCLUDE_MAPS", "true")) %in% c("true", "1", "yes")
