@@ -1,58 +1,74 @@
-# Large data files (obtain separately)
+# =============================================================================
+# RENTASALUD .gitignore
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Data files (restricted - obtain from IECA/INE separately)
+# -----------------------------------------------------------------------------
 Datos/mp11.txt
 Datos/smp11cau.txt
 Datos/datos_rentapop_long.csv
 Datos/datos_rentapop_long.RData
 Analysis/datos_rentapop_long.RData
 
-# CI test data (auto-generated, not for commit)
+# -----------------------------------------------------------------------------
+# Test data and outputs (CI mode)
+# -----------------------------------------------------------------------------
 Datos_CI/
+Resultados/test_run/
 
-
-# Shapefiles (obtain from INE separately)
+# -----------------------------------------------------------------------------
+# Shapefiles (large - obtain from INE separately)
+# -----------------------------------------------------------------------------
 Analysis/SHP/
 Analysis/SHP_opt/
 Datos/SHP/
+SHP_opt/
 
+# -----------------------------------------------------------------------------
 # Large R objects
+# -----------------------------------------------------------------------------
 *.RData
 *.rds
 *.zip
 
-# Compiled outputs (but NOT the article source files)
+# -----------------------------------------------------------------------------
+# Pipeline outputs (regenerated from source data)
+# -----------------------------------------------------------------------------
 Resultados/*.csv
 Resultados/*.png
-Resultados/Article/articulo/index.pdf
-Resultados/Article/articulo/index.tex
-Resultados/Article/articulo/index.docx
-Resultados/Article/articulo/*_revised.docx
-Resultados/Article/articulo/*.log
-Resultados/Article/articulo/cover-letter.docx
-Resultados/Article/articulo/cover-letter_revised.docx
-Resultados/Article/articulo/title-page.docx
-Resultados/Article/articulo/title-page_revised.docx
-Resultados/Article/articulo/abstract_revised.docx
-Resultados/Article/articulo/methods_report.pdf
-Resultados/Article/articulo/cover-letter_files/
 Resultados/Figuras/
 
-# R artifacts
+# -----------------------------------------------------------------------------
+# Manuscript outputs (keep source .qmd, ignore compiled)
+# -----------------------------------------------------------------------------
+Resultados/Article/
+Resultados/bmj.csl
+
+# -----------------------------------------------------------------------------
+# R and IDE artifacts
+# -----------------------------------------------------------------------------
 .Rproj.user/
 .Rhistory
 .Rapp.history
+.RData
+.Ruserdata
+*.Rproj
+
+# -----------------------------------------------------------------------------
+# System files
+# -----------------------------------------------------------------------------
 .DS_Store
 .vscode/
+*.swp
+*~
 
-# Quarto
-Resultados/Article/articulo/_extensions/
-Resultados/Article/articulo/_quarto/
-Resultados/Article/articulo/_freeze/
-
-# Confidential / internal (never publish to this public repo)
-Resultados/Article/
-Resultados/bmj.csl
+# -----------------------------------------------------------------------------
+# Internal development files
+# -----------------------------------------------------------------------------
 gpai_workflow/
-.claude/
 
-# Municipal analysis generated outputs
+# -----------------------------------------------------------------------------
+# Municipal analysis outputs
+# -----------------------------------------------------------------------------
 Analysis/EV_municipal/salidas/
