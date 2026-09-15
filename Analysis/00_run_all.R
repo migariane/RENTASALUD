@@ -18,14 +18,19 @@
 ##    │     Writes: SHP_opt/seccionado_YYYY.rds
 ##    │     Why:    RDS loads 10-50× faster than shapefile in Shiny
 ##    │
-##    ├── PARTE B: Life expectancy by cause, age, sex, and province
-##    │     Reads:  ../Datos_CI/mp11.txt (BDLPA persons, ~637k)
-##    │             ../Datos_CI/smp11cau.txt (BDLPA follow-up + cause)
-##    │     Method: Chiang (1968) cause-deleted life tables
+##    ├── PARTE B: Life expectancy by cause, age, sex, province, and sex-pooled
+##    │     Reads:  ../Datos/mp11.txt (BDLPA persons, ~637k; ../Datos_CI in CI mode)
+##    │             ../Datos/smp11cau.txt (BDLPA follow-up + cause)
+##    │             ../Datos/datos_rentapop_long.csv (INE income atlas, section-level)
+##    │     Method: Chiang (1968) cause-deleted life tables + proportional-hazard
+##    │             adjustment; sex-pooled (both-sex) life tables; non-parametric
+##    │             bootstrap confidence intervals; income–EV correlations,
+##    │             regression slopes, and leave-one-province-out sensitivity
 ##    │     Writes: (see PARTE C below)
 ##    │
 ##    └── PARTE C: Export all results
 ##          Writes: ../Resultados/*.csv + grafico_ganancia_por_causa.png
+##                                               (../Resultados/test_run/ in CI mode)
 ##
 ##  KEY DESIGN DECISIONS:
 ##    1. Province-level EV, NOT section-level:
@@ -58,9 +63,11 @@
 ##
 ##  HOW TO RUN:
 ##    cd RENTASALUD/Analysis
-##    Rscript 00_run_all.R
+##    Rscript 00_run_all.R            # run on real BDLPA data in ../Datos/
+##    RENTASALUD_CI_MODE=true Rscript 00_run_all.R   # smoke test on synthetic data
 ##
-##  EXPECTED RUNTIME: ~3-5 minutes (dominated by shapefile I/O and 20 life tables)
+##  EXPECTED RUNTIME: ~5-10 minutes on real data (bootstrap dominates;
+##  set RENTASALUD_N_BOOT to reduce resamples, 999 by default).
 ## =============================================================================
 
 ## ---------------------------------------------------------------------------
@@ -77,33 +84,69 @@ if (dir.exists("/mnt/user-data/uploads")) {
   # Deployed server environment (Shiny Server / shinyapps.io)
   ruta_mp11     <- "/mnt/user-data/uploads/mp11.txt"
   ruta_smp11cau <- "/mnt/user-data/uploads/smp11cau.txt"
+  ruta_renta    <- "/mnt/user-data/uploads/datos_rentapop_long.csv"
   out_dir       <- "/mnt/user-data/outputs"
 } else {
-  # Local development environment
-  ruta_mp11     <- "../Datos_CI/mp11.txt"
-  ruta_smp11cau <- "../Datos_CI/smp11cau.txt"
+  # Local development environment: place real data in ../Datos/
+  ruta_mp11     <- "../Datos/mp11.txt"
+  ruta_smp11cau <- "../Datos/smp11cau.txt"
+  ruta_renta    <- "../Datos/datos_rentapop_long.csv"
   out_dir       <- "../Resultados"
 }
 
-# CI MODE: Detect if running in CI (GitHub Actions)
+# CI MODE: Detect if running in CI (GitHub Actions) or a local smoke run.
+# Outputs are written to Resultados/test_run/ so synthetic results can never
+# be mistaken for the manuscript's real-data outputs.
 ci_mode <- Sys.getenv("RENTASALUD_CI_MODE") == "true"
 
 if (ci_mode) {
   cat("  [CI MODE] Using synthetic test data\n")
   # Generate test data files if they don't exist
-  if (!file.exists("../Datos_CI/mp11.txt") || !file.exists("../Datos_CI/smp11cau.txt")) {
+  if (!file.exists("../Datos_CI/mp11.txt") || !file.exists("../Datos_CI/smp11cau.txt") ||
+      !file.exists("../Datos_CI/datos_rentapop_long.csv")) {
     source("generate_test_data.R")
   }
   # Override paths to use generated test data
   ruta_mp11     <- "../Datos_CI/mp11.txt"
   ruta_smp11cau <- "../Datos_CI/smp11cau.txt"
-  # Skip real-data stopifnot in CI mode
+  ruta_renta    <- "../Datos_CI/datos_rentapop_long.csv"
+  # Keep CI/test outputs separate so they can never be mistaken for results
+  out_dir       <- "../Resultados/test_run"
 } else {
+
   # Fail fast if input data is missing — don't waste time on partial runs
   stopifnot(file.exists(ruta_mp11))
   stopifnot(file.exists(ruta_smp11cau))
+  
+
+  # SAFEGUARD: Detect synthetic data being run in production mode.
+  # Real mp11.txt is ~49 MB (~637k lines); synthetic is ~400 KB (~8k lines).
+  # If the file is suspiciously small, warn the user before overwriting
+  # production outputs with synthetic results.
+  mp11_size_mb <- file.info(ruta_mp11)$size / 1e6
+  if (mp11_size_mb < 1) {
+    stop(paste0(
+      "\n",
+      "========================================================================\n",
+      "  SAFEGUARD: mp11.txt is only ", round(mp11_size_mb, 2), " MB (expected ~49 MB).\n",
+      "  This looks like SYNTHETIC TEST DATA, not the real BDLPA cohort.\n",
+      "\n",
+      "  If you intend to run on synthetic data, set:\n",
+      "    RENTASALUD_CI_MODE=true Rscript 00_run_all.R\n",
+      "\n",
+      "  This will write outputs to Resultados/test_run/ instead of\n",
+      "  overwriting the manuscript's production results.\n",
+      "========================================================================\n"
+    ))
+  }
 }
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Number of bootstrap resamples (manuscript: 999; small in CI for speed).
+n_boot <- suppressWarnings(as.integer(Sys.getenv("RENTASALUD_N_BOOT")))
+if (is.na(n_boot)) n_boot <- 999L
+if (ci_mode) n_boot <- min(n_boot, 50L)
+cat("  Bootstrap resamples:", n_boot, "\n")
 
 # ── Demographic parameters ──
 
@@ -536,10 +579,12 @@ print(resumen)
 ##    Padrón Continuo (municipal register), which is not currently available.
 ##
 ##  STABILITY NOTE:
-##    Province-level samples range from ~27k (Granada) to ~55k (Cádiz) per
-##    sex. In extreme age bands (0-4, 90+), death counts may be <5, causing
-##    unstable Mx estimates. The EV at birth (first band) is robust because
-##    it integrates information from all 19 age bands.
+##    Each province × sex life table is built from tens of thousands of
+##    individuals (exact per-province counts are printed in
+##    ev_por_provincia_sexo.csv). In extreme age bands (0-4, 90+), death
+##    counts may be <5, causing unstable Mx estimates. The EV at birth
+##    (first band) is robust because it integrates information from all
+##    19 age bands.
 
 cat("\n\n", strrep("=", 55), "\n")
 cat("  EV AL NACER POR PROVINCIA Y SEXO\n")
@@ -598,17 +643,283 @@ ev_provincia_ancho <- reshape(
 names(ev_provincia_ancho) <- c("provincia", "EV_Hombres", "EV_Mujeres")
 
 
+## ---------------------------------------------------------------------------
+## B10. Both-sex pooled life tables (men and women combined)
+## ---------------------------------------------------------------------------
+##  Reviewer point (A12): the pooled "both sexes" life expectancy must come
+##  from a proper life table built on men and women together, NOT from
+##  averaging the male and female life tables. We pool person-time and
+##  deaths across sexes and rebuild the Chiang life table for the combined
+##  group, separately for each province and for Andalusia as a whole.
+## ---------------------------------------------------------------------------
+
+# Generic life-table-at-birth (Chiang, 1968) from a logical person selection.
+ev_nacer_sel <- function(sel) {
+  py <- colSums(anos_persona[sel, , drop = FALSE])
+  es_fallecido <- datos$TIPOB == 1 & sel
+  muertes <- as.numeric(table(factor(datos$banda_salida[es_fallecido], levels = etiquetas_banda)))
+  Mx <- muertes / py
+  n <- anchura_banda; ax <- n / 2
+  qx <- (n * Mx) / (1 + ax * Mx); qx[n_bandas] <- 1
+  lx <- numeric(n_bandas + 1); lx[1] <- 100000
+  for (i in 1:n_bandas) lx[i + 1] <- lx[i] * (1 - qx[i])
+  dx <- -diff(lx); Lx <- numeric(n_bandas)
+  for (i in 1:(n_bandas - 1)) Lx[i] <- n[i] * lx[i + 1] + ax[i] * dx[i]
+  Lx[n_bandas] <- lx[n_bandas] / Mx[n_bandas]
+  Tx <- rev(cumsum(rev(Lx)))
+  c(ev = Tx[1] / lx[1], n_personas = sum(sel), n_muertes = sum(muertes))
+}
+
+ambos_provincia <- do.call(rbind, lapply(names(nombres_provincia), function(cod_prov) {
+  sel <- datos$PROVINCIA == cod_prov
+  r <- ev_nacer_sel(sel)
+  data.frame(provincia = nombres_provincia[cod_prov],
+             sexo = "Ambos sexos",
+             esperanza_vida_nacer = round(r[["ev"]], 2),
+             n_personas = r[["n_personas"]], n_muertes = r[["n_muertes"]])
+}))
+
+ambos_andalucia <- ev_nacer_sel(rep(TRUE, nrow(datos)))
+ev_andalucia_ambos <- data.frame(
+  provincia = "Andalucia", sexo = "Ambos sexos",
+  esperanza_vida_nacer = round(ambos_andalucia[["ev"]], 2),
+  n_personas = ambos_andalucia[["n_personas"]], n_muertes = ambos_andalucia[["n_muertes"]])
+
+ev_por_provincia_ambos <- rbind(ambos_provincia, ev_andalucia_ambos)
+rownames(ev_por_provincia_ambos) <- NULL
+cat("\n  EV pooled por provincia (ambos sexos):\n")
+print(ev_por_provincia_ambos)
+
+# Extend the wide province table with the pooled estimate (used by the app).
+if (!"EV_Ambos" %in% names(ev_provincia_ancho)) {
+  ev_provincia_ancho <- merge(ev_provincia_ancho,
+                              ambos_provincia[, c("provincia", "esperanza_vida_nacer")],
+                              by = "provincia", all.x = TRUE)
+  names(ev_provincia_ancho)[names(ev_provincia_ancho) == "esperanza_vida_nacer"] <- "EV_Ambos"
+  ev_provincia_ancho <- ev_provincia_ancho[match(ev_provincia_ancho$provincia,
+                                                 ev_provincia_ancho$provincia), , drop = FALSE]
+}
+
+# Master table of all 27 life-table estimates (province × sex + pooled + Andalusia).
+ev_maestra <- rbind(
+  resultados_ev_provincia[, c("provincia", "sexo", "esperanza_vida_nacer")],
+  ambos_provincia[, c("provincia", "sexo", "esperanza_vida_nacer")],
+  data.frame(provincia = "Andalucia",
+             sexo = c("Hombres", "Mujeres", "Ambos sexos"),
+             esperanza_vida_nacer = round(c(tabla_hombres$esperanza_vida[1],
+                                            tabla_mujeres$esperanza_vida[1],
+                                            ambos_andalucia[["ev"]]), 2))
+)
+
+
+## ---------------------------------------------------------------------------
+## B11. Income aggregation (INE ADRH, census-section level)
+## ---------------------------------------------------------------------------
+##  Province income = population-weighted MEAN of the census-section median
+##  household incomes (Renta_Mediana_UC), weighting each section-year by its
+##  resident population (`pob`). This is the estimator used throughout the
+##  manuscript (Methods, Figure caption, Table 1/Appendix).
+## ---------------------------------------------------------------------------
+
+income_proc <- NULL
+if (file.exists(ruta_renta)) {
+  income_raw <- read.csv(ruta_renta, check.names = FALSE)
+  # IDs may lose leading zeros during CSV round-trips; always re-pad to 10.
+  income_raw$id <- as.character(income_raw$id)
+  income_raw$id <- substr(paste0("0000000000", income_raw$id),
+                          nchar(income_raw$id) + 1, nchar(income_raw$id) + 10)
+  income_raw$CPRO <- substr(income_raw$id, 1, 2)
+  income_raw <- income_raw[income_raw$CPRO %in% names(nombres_provincia), ]
+  cat("\n  Secciones-año con renta (8 provincias, 2015-2022):", nrow(income_raw), "\n")
+  income_raw$Provincia <- unname(nombres_provincia[income_raw$CPRO])
+
+  renta_provincia <- do.call(rbind, lapply(names(nombres_provincia), function(p) {
+    d <- income_raw[income_raw$CPRO == p, ]
+    w <- ifelse(is.na(d$Renta_Mediana_UC), 0, d$pob)
+    data.frame(CPRO = p, Provincia = unname(nombres_provincia[p]),
+               Renta_Media_Ponderada = round(weighted.mean(d$Renta_Mediana_UC, w = w, na.rm = TRUE), 0),
+               n_secciones_ano = nrow(d),
+               poblacion_total = sum(d$pob, na.rm = TRUE))
+  }))
+  print(renta_provincia)
+} else {
+  warning("Income file not found (", ruta_renta,
+          "). Skipping the income correlation analysis (B12).")
+  renta_provincia <- NULL
+}
+
+
+## ---------------------------------------------------------------------------
+## B12. Income–life expectancy association (province level, exploratory)
+## ---------------------------------------------------------------------------
+##  With only 8 provinces these are descriptive. We report Pearson and
+##  Spearman correlations, the OLS slope (years of LE per €1000 income),
+##  and a leave-one-province-out sensitivity table (reviewer A16).
+## ---------------------------------------------------------------------------
+
+if (!is.null(renta_provincia)) {
+  ev_renta <- merge(ev_maestra, renta_provincia[, c("Provincia", "Renta_Media_Ponderada")],
+                    by.x = "provincia", by.y = "Provincia", all.x = FALSE)
+
+  correlaciones_renta_ev <- do.call(rbind, lapply(c("Hombres", "Mujeres", "Ambos sexos"), function(sx) {
+    d <- ev_renta[ev_renta$sexo == sx & is.finite(ev_renta$esperanza_vida_nacer), ]
+    if (nrow(d) < 4) {
+      return(data.frame(sexo = sx, n = nrow(d),
+                        r_pearson = NA, p_pearson = NA, rho_spearman = NA, p_spearman = NA,
+                        pendiente_por_1000_euros = NA, ic95_inf = NA, ic95_sup = NA))
+    }
+    r_p <- tryCatch(cor.test(d$Renta_Media_Ponderada, d$esperanza_vida_nacer, method = "pearson"),
+                    error = function(e) NULL)
+    r_s <- tryCatch(cor.test(d$Renta_Media_Ponderada, d$esperanza_vida_nacer, method = "spearman"),
+                    error = function(e) NULL)
+    fit <- tryCatch(lm(esperanza_vida_nacer ~ Renta_Media_Ponderada, data = d), error = function(e) NULL)
+    ci <- if (!is.null(fit)) confint(fit, "Renta_Media_Ponderada") else c(NA, NA)
+    data.frame(
+      sexo = sx, n = nrow(d),
+      r_pearson = if (!is.null(r_p)) round(r_p$estimate, 2) else NA,
+      p_pearson = if (!is.null(r_p)) round(r_p$p.value, 3) else NA,
+      rho_spearman = if (!is.null(r_s)) round(as.numeric(r_s$estimate), 2) else NA,
+      p_spearman = if (!is.null(r_s)) round(r_s$p.value, 3) else NA,
+      pendiente_por_1000_euros = if (!is.null(fit)) round(coef(fit)[["Renta_Media_Ponderada"]] * 1000, 2) else NA,
+      ic95_inf = round(ci[1] * 1000, 2), ic95_sup = round(ci[2] * 1000, 2)
+    )
+  }))
+  cat("\n  Correlaciones renta-EV (8 provincias):\n")
+  print(correlaciones_renta_ev)
+
+  sensibilidad_l1o <- do.call(rbind, lapply(c("Hombres", "Mujeres", "Ambos sexos"), function(sx) {
+    d <- ev_renta[ev_renta$sexo == sx & is.finite(ev_renta$esperanza_vida_nacer), ]
+    do.call(rbind, lapply(d$provincia, function(p_excl) {
+      d2 <- d[d$provincia != p_excl, ]
+      if (nrow(d2) < 4) {
+        return(data.frame(sexo = sx, excluida = p_excl, n = nrow(d2), r_pearson = NA, p = NA))
+      }
+      r <- tryCatch(cor.test(d2$Renta_Media_Ponderada, d2$esperanza_vida_nacer, method = "pearson"),
+                    error = function(e) NULL)
+      data.frame(sexo = sx, excluida = p_excl, n = nrow(d2),
+                 r_pearson = if (!is.null(r)) round(r$estimate, 2) else NA,
+                 p = if (!is.null(r)) round(r$p.value, 3) else NA)
+    }))
+  }))
+  cat("\n  Sensibilidad leave-one-province-out:\n")
+  print(sensibilidad_l1o)
+} else {
+  correlaciones_renta_ev <- NULL
+  sensibilidad_l1o <- NULL
+}
+
+
+## ---------------------------------------------------------------------------
+## B13. Non-parametric bootstrap confidence intervals
+## ---------------------------------------------------------------------------
+##  Resamples INDIVIDUALS with replacement within each stratum (province ×
+##  sex: 16; province pooled both-sex: 8; Andalusia overall by sex and
+##  pooled: 3), recomputes the Chiang life table at birth on each resample,
+##  and summarises the resample distribution with 2.5/97.5 percentiles.
+##  The observed EV is the point estimate. Number of resamples = n_boot
+##  (999 by default; reduced in CI mode).
+## ---------------------------------------------------------------------------
+
+if (n_boot > 0) {
+  celdas_which <- which(anos_persona > 0, arr.ind = TRUE)
+  celdas_p <- celdas_which[, 1]
+  celdas_b <- celdas_which[, 2]
+  celdas_v <- anos_persona[celdas_which]
+
+  es_fall <- datos$TIPOB == 1
+  muertos_p <- which(es_fall)
+  muertos_b <- as.integer(factor(datos$banda_salida[es_fall], levels = etiquetas_banda))
+
+  ev_desde_py_muertes <- function(py, muertes) {
+    Mx <- muertes / py
+    n <- anchura_banda; ax <- n / 2
+    qx <- (n * Mx) / (1 + ax * Mx); qx[n_bandas] <- 1
+    lx <- numeric(n_bandas + 1); lx[1] <- 100000
+    for (i in 1:n_bandas) lx[i + 1] <- lx[i] * (1 - qx[i])
+    dx <- -diff(lx); Lx <- numeric(n_bandas)
+    for (i in 1:(n_bandas - 1)) Lx[i] <- n[i] * lx[i + 1] + ax[i] * dx[i]
+    Lx[n_bandas] <- lx[n_bandas] / Mx[n_bandas]
+    Tx <- rev(cumsum(rev(Lx)))
+    Tx[1] / lx[1]
+  }
+
+  boot_estrato <- function(sel, n_rep) {
+    pers <- which(sel)
+    npers <- length(pers)
+    stopifnot(npers > 0)
+    mask_c <- celdas_p %in% pers
+    lc_p <- match(celdas_p[mask_c], pers); lc_b <- celdas_b[mask_c]; lc_v <- celdas_v[mask_c]
+    mask_d <- muertos_p %in% pers
+    ld_p <- match(muertos_p[mask_d], pers); ld_b <- muertos_b[mask_d]
+    vapply(seq_len(n_rep), function(r) {
+      m <- tabulate(sample.int(npers, npers, replace = TRUE), nbins = npers)
+      z1 <- rowsum(lc_v * m[lc_p], lc_b, reorder = TRUE)
+      py_b <- numeric(n_bandas); py_b[as.integer(rownames(z1))] <- z1[, 1]
+      z2 <- rowsum(m[ld_p], ld_b, reorder = TRUE)
+      mu_b <- numeric(n_bandas); mu_b[as.integer(rownames(z2))] <- z2[, 1]
+      ev_desde_py_muertes(py_b, mu_b)
+    }, numeric(1))
+  }
+
+  prov_a_cod <- setNames(names(nombres_provincia), unname(nombres_provincia))
+  plan_boot <- rbind(
+    data.frame(provincia = resultados_ev_provincia$provincia, sexo = resultados_ev_provincia$sexo),
+    data.frame(provincia = ambos_provincia$provincia, sexo = "Ambos sexos"),
+    data.frame(provincia = rep("Andalucia", 3), sexo = c("Hombres", "Mujeres", "Ambos sexos"))
+  )
+
+  sel_estrato <- function(prov, sx) {
+    base <- if (prov == "Andalucia") rep(TRUE, nrow(datos)) else datos$PROVINCIA == prov_a_cod[prov]
+    switch(sx,
+           "Hombres"     = base & datos$SEXO == "1",
+           "Mujeres"     = base & datos$SEXO == "6",
+           "Ambos sexos" = base)
+  }
+
+  cat("\n  Bootstrap ({", n_boot, "} resamples) ...\n", sep = "")
+  # Defensive CI summariser: drops non-finite resamples (only possible in
+  # tiny synthetic strata with zero deaths in the 90+ open interval).
+  ci_boot <- function(evs) {
+    evs <- evs[is.finite(evs)]
+    c(inf = if (length(evs) > 0) as.numeric(quantile(evs, 0.025, type = 7)) else NA,
+      sup = if (length(evs) > 0) as.numeric(quantile(evs, 0.975, type = 7)) else NA)
+  }
+  ev_bootstrap_ci <- do.call(rbind, lapply(seq_len(nrow(plan_boot)), function(i) {
+    pr <- plan_boot$provincia[i]; sx <- plan_boot$sexo[i]
+    sel <- sel_estrato(pr, sx)
+    evs <- boot_estrato(sel, n_boot)
+    punto <- ev_maestra[ev_maestra$provincia == pr & ev_maestra$sexo == sx, "esperanza_vida_nacer"]
+    ci <- ci_boot(evs)
+    data.frame(provincia = pr, sexo = sx,
+               punto = punto,
+               ic95_inf = round(ci[["inf"]], 2),
+               ic95_sup = round(ci[["sup"]], 2))
+  }))
+  print(ev_bootstrap_ci)
+} else {
+  ev_bootstrap_ci <- NULL
+}
+
+
 ## =============================================================================
 ## PARTE C: Guardar todos los resultados
 ## =============================================================================
 ##
-##  OUTPUT FILES (written to ../Resultados/):
+##  OUTPUT FILES (written to out_dir — ../Resultados/ normally,
+##  ../Resultados/test_run/ in CI mode):
 ##    1. ganancia_esperanza_vida_por_causa.csv — 20 rows (10 causes × 2 sexes)
 ##    2. tabla_vida_hombres.csv              — 19 rows (age bands)
 ##    3. tabla_vida_mujeres.csv              — 19 rows
 ##    4. ev_por_provincia_sexo.csv           — 16 rows (8 provinces × 2 sexes, long)
-##    5. ev_por_provincia_ancho.csv          — 10 rows (one per territory, wide)
-##    6. grafico_ganancia_por_causa.png      — horizontal barplot
+##    5. ev_por_provincia_ancho.csv          — 8 rows (one per province, wide;
+##                                               columns EV_Hombres, EV_Mujeres,
+##                                               EV_Ambos from the pooled life table)
+##    6. ev_por_provincia_ambos_sexos.csv    — 9 rows (8 provinces + Andalusia, pooled)
+##    7. renta_por_provincia.csv             — 8 rows (population-weighted mean income)
+##    8. correlaciones_renta_ev.csv          — 3 rows (H / M / both sexes)
+##    9. sensibilidad_leave_one_out.csv      — omit-one-province Pearson r (+ p)
+##   10. ev_bootstrap_ci.csv                 — 27 rows (punto + 95% CI)
+##   11. grafico_ganancia_por_causa.png      — horizontal barplot
 
 cat("\n\n", strrep("-", 50), "\n")
 cat("  PARTE C: Guardar resultados\n")
@@ -619,6 +930,15 @@ write.csv(tabla_hombres, file.path(out_dir, "tabla_vida_hombres.csv"), row.names
 write.csv(tabla_mujeres, file.path(out_dir, "tabla_vida_mujeres.csv"), row.names = FALSE)
 write.csv(resultados_ev_provincia, file.path(out_dir, "ev_por_provincia_sexo.csv"), row.names = FALSE)
 write.csv(ev_provincia_ancho, file.path(out_dir, "ev_por_provincia_ancho.csv"), row.names = FALSE)
+write.csv(ev_por_provincia_ambos, file.path(out_dir, "ev_por_provincia_ambos_sexos.csv"), row.names = FALSE)
+if (!is.null(renta_provincia)) {
+  write.csv(renta_provincia, file.path(out_dir, "renta_por_provincia.csv"), row.names = FALSE)
+  write.csv(correlaciones_renta_ev, file.path(out_dir, "correlaciones_renta_ev.csv"), row.names = FALSE)
+  write.csv(sensibilidad_l1o, file.path(out_dir, "sensibilidad_leave_one_out.csv"), row.names = FALSE)
+}
+if (!is.null(ev_bootstrap_ci)) {
+  write.csv(ev_bootstrap_ci, file.path(out_dir, "ev_bootstrap_ci.csv"), row.names = FALSE)
+}
 
 cat("\n  Ficheros guardados en", out_dir, ":\n")
 cat("  - ganancia_esperanza_vida_por_causa.csv\n")
@@ -626,6 +946,28 @@ cat("  - tabla_vida_hombres.csv\n")
 cat("  - tabla_vida_mujeres.csv\n")
 cat("  - ev_por_provincia_sexo.csv\n")
 cat("  - ev_por_provincia_ancho.csv\n")
+cat("  - ev_por_provincia_ambos_sexos.csv\n")
+if (!is.null(renta_provincia)) {
+  cat("  - renta_por_provincia.csv\n")
+  cat("  - correlaciones_renta_ev.csv\n")
+  cat("  - sensibilidad_leave_one_out.csv\n")
+}
+if (!is.null(ev_bootstrap_ci)) cat("  - ev_bootstrap_ci.csv\n")
+
+## ---------------------------------------------------------------------------
+## Smoke checks (fail fast in CI if a required output is missing/malformed)
+## ---------------------------------------------------------------------------
+
+obligatorios <- c("ganancia_esperanza_vida_por_causa.csv", "tabla_vida_hombres.csv",
+                  "tabla_vida_mujeres.csv", "ev_por_provincia_sexo.csv",
+                  "ev_por_provincia_ancho.csv", "ev_por_provincia_ambos_sexos.csv")
+falta <- obligatorios[!file.exists(file.path(out_dir, obligatorios))]
+if (length(falta) > 0) stop("Missing pipeline outputs: ", paste(falta, collapse = ", "))
+if (nrow(resultados_ev_provincia) != 16) stop("ev_por_provincia_sexo must have 16 rows")
+if (nrow(ev_por_provincia_ambos) != 9) stop("ev_por_provincia_ambos_sexos must have 9 rows")
+if (any(is.na(ev_provincia_ancho$EV_Ambos))) stop("EV_Ambos must be present for all provinces")
+if (!is.null(ev_bootstrap_ci) && nrow(ev_bootstrap_ci) != 27) stop("ev_bootstrap_ci must have 27 rows")
+cat("  [OK] Todos los ficheros de salida están presentes y bien formados.\n")
 
 ## ---------------------------------------------------------------------------
 ## C1. Gráfico: ganancia por causa (hombres)
