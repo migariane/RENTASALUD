@@ -91,25 +91,48 @@ ruta_ev <- if (file.exists("../Resultados/ev_por_provincia_ancho.csv")) {
   "../Resultados/ev_por_provincia_ancho.csv"
 } else if (file.exists("/mnt/user-data/outputs/ev_por_provincia_ancho.csv")) {
   "/mnt/user-data/outputs/ev_por_provincia_ancho.csv"
+} else if (file.exists("../Resultados/test_run/ev_por_provincia_ancho.csv")) {
+  warning("No real-data outputs in ../Resultados/. Loading SYNTHETIC test outputs from Resultados/test_run/ - the atlas will show placeholder life expectancy. Run 00_run_all.R on the real BDLPA data before deploying.")
+  "../Resultados/test_run/ev_por_provincia_ancho.csv"
 } else {
   "ev_por_provincia_ancho.csv"
 }
 ev_prov <- read.csv(ruta_ev, stringsAsFactors = FALSE)
 
+# Guard: male life expectancy < 75 years for a province is a strong sign the
+# loaded table is synthetic test data (real BDLPA values are ~78-80).
+if ("EV_Hombres" %in% names(ev_prov) &&
+    median(ev_prov$EV_Hombres, na.rm = TRUE) < 75) {
+  warning("Province-level male life expectancy below 75 years detected in the loaded EV table. ",
+          "This is almost certainly synthetic test data. Re-run 00_run_all.R on the ",
+          "real mp11.txt/smp11cau.txt before deploying the atlas.")
+}
+
 # Join EV to census-section data by province.
-# ALL sections within a province get the same EV value because the
-# BDLPA only provides province-level geographic codes.
+# ALL sections within a province get the same EV value because the BDLPA only
+# provides province-level geographic codes.
 datos <- datos %>%
   left_join(ev_prov, by = c("Provincia" = "provincia"))
 
-# Mean EV = simple average of male + female (unweighted by population
-# age structure, appropriate for descriptive comparison).
-datos$EV_Media <- round((datos$EV_Hombres + datos$EV_Mujeres) / 2, 2)
+# Both-sex life expectancy: use the population-pooled life table computed by
+# the pipeline (EV_Ambos), NOT the arithmetic mean of the male and female
+# life tables (reviewer point A12). Arithmetic mean is only a fallback for
+# tables predating the pooled estimate.
+if ("EV_Ambos" %in% names(ev_prov)) {
+  datos$EV_Media <- round(datos$EV_Ambos, 2)
+} else {
+  warning("No EV_Ambos column in the wide EV table - falling back to the arithmetic ",
+          "mean of EV_Hombres and EV_Mujeres. Re-run 00_run_all.R to get the pooled estimate.")
+  datos$EV_Media <- round((datos$EV_Hombres + datos$EV_Mujeres) / 2, 2)
+}
 
 # ── Province-level summary (for income-EV correlation) ──
+# Province income is the POPULATION-WEIGHTED mean of the census-section
+# median incomes (weight = the section-year's resident population), matching
+# the manuscript Methods (reviewer point A13).
 renta_provincia <- datos %>%
   group_by(Provincia) %>%
-  summarise(Renta_Media = mean(Renta_Mediana_UC, na.rm = TRUE),
+  summarise(Renta_Media = weighted.mean(Renta_Mediana_UC, w = pob, na.rm = TRUE),
             EV_Media = mean(EV_Media, na.rm = TRUE),
             .groups = "drop")
 
