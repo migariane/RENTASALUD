@@ -2,7 +2,7 @@
 
 **Income Inequalities and Life Expectancy in Andalusia, Southern Spain**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21237758.svg)](https://doi.org/10.5281/zenodo.21237758)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21237758-1682D4?logo=zenodo&logoColor=white)](https://doi.org/10.5281/zenodo.21237758)
 [![R 4.4+](https://img.shields.io/badge/R-4.4%2B-276DC3?logo=r&logoColor=white)](https://cran.r-project.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![CI](https://github.com/migariane/RENTASALUD/actions/workflows/rentasalud-reproducible.yml/badge.svg)](https://github.com/migariane/RENTASALUD/actions)

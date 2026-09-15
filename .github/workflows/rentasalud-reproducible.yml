@@ -57,11 +57,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: analysis-results
+          # CI mode writes to Resultados/test_run/ (never Resultados/ directly),
+          # so the glob must point there or the artifact is silently empty and
+          # every downstream job fails to find the outputs.
           path: |
-            Resultados/*.csv
-            Resultados/*.png
+            Resultados/test_run/*.csv
+            Resultados/test_run/*.png
+          if-no-files-found: error
 
   # 2. Render Quarto article
+  #    The manuscript source (Resultados/Article/) is gitignored and not part
+  #    of the repository, so this job skips cleanly unless the source is present.
   render-article:
     name: Render Quarto Article
     runs-on: ubuntu-latest
@@ -69,42 +75,61 @@ jobs:
     needs: run-analysis
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check article source is present
+        id: check
+        run: |
+          if [ -f "Resultados/Article/articulo/index.qmd" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Resultados/Article/articulo/index.qmd is not tracked in this repository; skipping the Quarto article render."
+          fi
       
       - name: Download analysis results
+        if: steps.check.outputs.present == 'true'
         uses: actions/download-artifact@v4
         with:
           name: analysis-results
           path: Resultados/
       
       - name: Set up Quarto
+        if: steps.check.outputs.present == 'true'
         uses: quarto-dev/quarto-actions/setup@v2
       
       - name: Install R for Quarto
+        if: steps.check.outputs.present == 'true'
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.4'
           use-public-rspm: true
       
       - name: Install R packages for article
+        if: steps.check.outputs.present == 'true'
         run: |
           Rscript -e "install.packages(c('knitr', 'rmarkdown', 'bookdown', 'tinytex', 'flextable', 'gt', 'dplyr', 'ggplot2', 'scales', 'patchwork'), repos='https://cloud.r-project.org/')"
       
       - name: Install TinyTeX
+        if: steps.check.outputs.present == 'true'
         run: |
           Rscript -e "tinytex::install_tinytex()"
       
       - name: Render article
+        if: steps.check.outputs.present == 'true'
         run: |
           cd Resultados/Article/articulo
           quarto render index.qmd --to pdf
       
       - name: Upload article PDF
+        if: steps.check.outputs.present == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: article-pdf
           path: Resultados/Article/articulo/index.pdf
 
   # 3. Test Shiny app loads (smoke test)
+  #    The app's income data (Analysis/datos_rentapop_long.RData) is restricted
+  #    and gitignored, so this job skips cleanly unless the file is present.
   test-shiny:
     name: Test Shiny App Loads
     runs-on: ubuntu-latest
@@ -112,24 +137,38 @@ jobs:
     needs: run-analysis
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check Shiny income data is present
+        id: check
+        run: |
+          if [ -f "Analysis/datos_rentapop_long.RData" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Analysis/datos_rentapop_long.RData (restricted INE income data) is not tracked in this repository; skipping the Shiny smoke test."
+          fi
       
       - name: Download analysis results
+        if: steps.check.outputs.present == 'true'
         uses: actions/download-artifact@v4
         with:
           name: analysis-results
           path: Resultados/
       
       - name: Set up R
+        if: steps.check.outputs.present == 'true'
         uses: r-lib/actions/setup-r@v2
         with:
           r-version: '4.4'
           use-public-rspm: true
       
       - name: Install Shiny dependencies
+        if: steps.check.outputs.present == 'true'
         run: |
           Rscript -e "install.packages(c('shiny', 'bslib', 'leaflet', 'sf', 'DT', 'dplyr', 'ggplot2', 'scales', 'plotly', 'htmltools', 'htmlwidgets', 'jsonlite', 'readr'), repos='https://cloud.r-project.org/')"
       
       - name: Test Shiny app loads
+        if: steps.check.outputs.present == 'true'
         run: |
           cd Analysis
           Rscript -e "
